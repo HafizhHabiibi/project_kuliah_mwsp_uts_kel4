@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'forget_pass_screen.dart';
-import 'register_form_screen.dart';
+import 'login_form_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgetPassScreen extends StatefulWidget {
+  const ForgetPassScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgetPassScreen> createState() => _ForgetPassScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _ForgetPassScreenState extends State<ForgetPassScreen>
     with SingleTickerProviderStateMixin {
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _obscurePassword = true;
 
   late AnimationController _controller;
@@ -36,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void dispose() {
     _controller.dispose();
-    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -70,13 +66,12 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Sign In",
+                          "Forget Password",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -87,30 +82,9 @@ class _LoginScreenState extends State<LoginScreen>
                       const SizedBox(height: 8),
                       const Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-                        textAlign: TextAlign.left,
                         style: TextStyle(color: Colors.black87),
                       ),
                       const SizedBox(height: 24),
-
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Username',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          hintText: 'Email Address',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -123,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen>
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          hintText: 'Enter your password',
+                          hintText: 'Password',
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -139,7 +113,6 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 24),
-
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -152,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                         child: const Text(
-                          "LOGIN",
+                          "SUBMIT",
                           style: TextStyle(
                             fontSize: 16,
                             letterSpacing: 1.5,
@@ -160,72 +133,44 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ForgetPassScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "Forgot Password? Reset Password",
-                          style: TextStyle(
-                            color: Color.fromRGBO(74, 55, 73, 1),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/social/google-mail.png',
-                            height: 40,
-                          ),
-                          const SizedBox(width: 20),
-                          Image.asset(
-                            'assets/images/social/facebook.png',
-                            height: 40,
-                          ),
-                        ],
-                      ),
                       const SizedBox(height: 20),
 
-                      const Text(
-                        "Don’t have any account?",
-                        style: TextStyle(color: Colors.grey),
+                      // Teks informasi dan navigasi
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Sign in to your registered account",
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(color: Colors.black87),
+                        ),
                       ),
                       const SizedBox(height: 6),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterFormScreen(),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 0),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            "Login here",
+                            style: TextStyle(
+                              color: Color.fromRGBO(74, 55, 73, 1),
+                              fontWeight: FontWeight.w500,
                             ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          side: const BorderSide(
-                            color: Color.fromRGBO(34, 34, 34, 1),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "CREATE AN ACCOUNT",
-                          style: TextStyle(
-                            color: Color.fromRGBO(34, 34, 34, 1),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
