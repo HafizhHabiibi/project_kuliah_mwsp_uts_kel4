@@ -129,6 +129,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                         controller: _emailController,
                         decoration: InputDecoration(
                           hintText: 'Email Address',
+                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
@@ -150,6 +151,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Password',
+                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -175,7 +177,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor: const Color.fromRGBO(74, 55, 73, 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: const Text(
@@ -197,7 +199,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       const SizedBox(height: 6),
 
                       // Tombol Sign In
-                      OutlinedButton(
+                      ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
                           Future.delayed(const Duration(milliseconds: 300), () {
@@ -211,19 +213,17 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                             );
                           });
                         },
-                        style: OutlinedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
-                          side: const BorderSide(
-                            color: Color.fromRGBO(34, 34, 34, 1),
-                          ),
+                          backgroundColor: Color.fromRGBO(229, 229, 229, 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: const Text(
                           "SIGN IN",
                           style: TextStyle(
-                            color: Color.fromRGBO(34, 34, 34, 1),
+                            color: Color.fromRGBO(100, 100, 100, 1),
                           ),
                         ),
                       ),

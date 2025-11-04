@@ -98,6 +98,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen>
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Password',
+                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -121,7 +122,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen>
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor: const Color.fromRGBO(74, 55, 73, 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: const Text(

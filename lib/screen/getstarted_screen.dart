@@ -132,8 +132,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   (index) => AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _currentIndex == index ? 10 : 6,
-                    height: _currentIndex == index ? 10 : 6,
+                    width: _currentIndex == index ? 10 : 10,
+                    height: _currentIndex == index ? 10 : 10,
                     decoration: BoxDecoration(
                       color: _currentIndex == index
                           ? Colors.white

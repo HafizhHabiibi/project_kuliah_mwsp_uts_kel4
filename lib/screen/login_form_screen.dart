@@ -57,6 +57,7 @@ class _LoginScreenState extends State<LoginScreen>
             onTap: () => Navigator.pop(context),
             child: Container(color: const Color.fromRGBO(74, 55, 73, 1)),
           ),
+
           Align(
             alignment: Alignment.bottomCenter,
             child: SlideTransition(
@@ -101,7 +102,8 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                       const SizedBox(height: 10),
                       TextField(
-                        controller: _emailController,
+                        controller: _emailController
+                          ..text = _emailController.text.isEmpty ? 'info@example.com' : _emailController.text,
                         decoration: InputDecoration(
                           hintText: 'Email Address',
                           border: OutlineInputBorder(
@@ -123,7 +125,8 @@ class _LoginScreenState extends State<LoginScreen>
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          hintText: 'Enter your password',
+                          hintText: 'Password',
+                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -148,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen>
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor: const Color.fromRGBO(74, 55, 73, 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: const Text(
@@ -161,24 +164,46 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 10),
-
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ForgetPassScreen(),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                "Forgot Password?",
+                                style: TextStyle(
+                                  color: Color.fromRGBO(74, 55, 73, 1),
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                        child: const Text(
-                          "Forgot Password? Reset Password",
-                          style: TextStyle(
-                            color: Color.fromRGBO(74, 55, 73, 1),
-                          ),
+                            const SizedBox(width: 5),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgetPassScreen()));
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                "Reset Password",
+                                style: TextStyle(
+                                  color: Color.fromRGBO(74, 55, 73, 0.5),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 30),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -194,14 +219,14 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
 
                       const Text(
                         "Don’t have any account?",
                         style: TextStyle(color: Colors.grey),
                       ),
-                      const SizedBox(height: 6),
-                      OutlinedButton(
+                      const SizedBox(height: 16),
+                      ElevatedButton(
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -210,19 +235,17 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           );
                         },
-                        style: OutlinedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
-                          side: const BorderSide(
-                            color: Color.fromRGBO(34, 34, 34, 1),
-                          ),
+                          backgroundColor: Color.fromRGBO(229, 229, 229, 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: const Text(
                           "CREATE AN ACCOUNT",
                           style: TextStyle(
-                            color: Color.fromRGBO(34, 34, 34, 1),
+                            color: Color.fromRGBO(100, 100, 100, 1),
                           ),
                         ),
                       ),

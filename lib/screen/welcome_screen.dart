@@ -222,15 +222,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ),
                           minimumSize: const Size.fromHeight(50),
                         ),
-
-                        // Pastikan Anda telah mengimpor file login_form_screen.dart:
-                        // import 'package:project_kuliah_mwsp_uts_kel4/screen/login_form_screen.dart';
                         onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            backgroundColor: Colors.transparent,
-                            isScrollControlled: true,
-                            builder: (context) => const LoginScreen(),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(),
+                            ),
                           );
                         },
                         child: const Text(
