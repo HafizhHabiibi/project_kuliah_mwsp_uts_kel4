@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'forget_pass_screen.dart';
 import 'register_form_screen.dart';
+import 'reward_page.dart'; // tambahkan ini
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -103,7 +104,9 @@ class _LoginScreenState extends State<LoginScreen>
                       const SizedBox(height: 10),
                       TextField(
                         controller: _emailController
-                          ..text = _emailController.text.isEmpty ? 'info@example.com' : _emailController.text,
+                          ..text = _emailController.text.isEmpty
+                              ? 'info@example.com'
+                              : _emailController.text,
                         decoration: InputDecoration(
                           hintText: 'Email Address',
                           border: OutlineInputBorder(
@@ -126,7 +129,8 @@ class _LoginScreenState extends State<LoginScreen>
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Password',
-                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
+                          hintStyle: const TextStyle(
+                              color: Color.fromRGBO(74, 55, 73, 0.5)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -143,13 +147,19 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                       const SizedBox(height: 24),
 
+                      // Tombol LOGIN ke RewardsPage
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const RewardsPage()),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
-                          backgroundColor: const Color.fromRGBO(74, 55, 73, 1),
+                          backgroundColor:
+                              const Color.fromRGBO(74, 55, 73, 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
@@ -163,6 +173,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
@@ -172,9 +183,10 @@ class _LoginScreenState extends State<LoginScreen>
                             TextButton(
                               onPressed: () {},
                               style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(0, 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: const Text(
                                 "Forgot Password?",
@@ -186,12 +198,19 @@ class _LoginScreenState extends State<LoginScreen>
                             const SizedBox(width: 5),
                             TextButton(
                               onPressed: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgetPassScreen()));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgetPassScreen(),
+                                  ),
+                                );
                               },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: const Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                tapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: const Text(
                                 "Reset Password",
@@ -231,13 +250,15 @@ class _LoginScreenState extends State<LoginScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RegisterFormScreen(),
+                              builder: (context) =>
+                                  const RegisterFormScreen(),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
-                          backgroundColor: Color.fromRGBO(229, 229, 229, 1),
+                          backgroundColor:
+                              const Color.fromRGBO(229, 229, 229, 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),

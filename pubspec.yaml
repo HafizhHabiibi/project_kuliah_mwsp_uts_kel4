@@ -64,10 +64,11 @@ flutter:
   uses-material-design: true
 
   assets:
-      - assets/images/
-      - assets/images/background/
-      - assets/images/svg/bean.svg
-      - assets/images/social/
+    - assets/images/
+    - assets/images/background/
+    - assets/images/svg/
+    - assets/images/social/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
