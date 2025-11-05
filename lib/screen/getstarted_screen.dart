@@ -280,7 +280,7 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
                 child: Icon(
                   Icons.arrow_forward_rounded,
                   size: 28,
-                  color: Theme.of(context).primaryColor,
+                  color: Color.fromRGBO(74, 55, 73, 1),
                 ),
               ),
             ),
