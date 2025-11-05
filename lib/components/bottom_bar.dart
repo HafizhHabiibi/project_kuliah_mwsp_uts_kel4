@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/reward_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
 
 class BottomNavOverlay extends StatelessWidget {
   final int selectedIndex;
@@ -78,7 +79,14 @@ class BottomNavOverlay extends StatelessWidget {
         onItemTapped(index);
 
         // 👇 Tambahkan aksi navigasi di sini
-        if (index == 2) {
+        if (index == 1) {
+          // icon tas belanja → CartPage
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CartPage()),
+          );
+        } else if (index == 2) {
+          // icon toko → RewardPage
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const RewardsPage()),
