@@ -72,6 +72,7 @@ flutter:
       - assets/images/background/card-bg.png
       - assets/images/menus/
       - assets/images/svg/
+    - assets/images/svg/icons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

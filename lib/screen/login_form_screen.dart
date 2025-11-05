@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen>
                       const SizedBox(height: 8),
                       const Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-                        style: TextStyle(color: Colors.black87),
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                       const SizedBox(height: 24),
 

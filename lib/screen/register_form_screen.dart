@@ -88,7 +88,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       const SizedBox(height: 8),
                       const Text(
                         "Please fill in the form to continue",
-                        style: TextStyle(color: Colors.black87),
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                       const SizedBox(height: 24),
 
