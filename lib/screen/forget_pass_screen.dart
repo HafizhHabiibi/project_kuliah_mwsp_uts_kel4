@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/main_page.dart';
 import 'login_form_screen.dart';
 
 class ForgetPassScreen extends StatefulWidget {
@@ -81,14 +82,14 @@ class _ForgetPassScreenState extends State<ForgetPassScreen>
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+                        "Please enter a new password to continue.",
                         style: TextStyle(color: Colors.black87),
                       ),
                       const SizedBox(height: 24),
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Password',
+                          'New Password',
                           style: TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ),
@@ -97,8 +98,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen>
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
+                          hintText: 'Enter new password',
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -116,7 +116,12 @@ class _ForgetPassScreenState extends State<ForgetPassScreen>
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainPage(),
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
@@ -135,43 +140,22 @@ class _ForgetPassScreenState extends State<ForgetPassScreen>
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // Teks informasi dan navigasi
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Sign in to your registered account",
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(color: Colors.black87),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),
-                              ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 0),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            "Login here",
-                            style: TextStyle(
-                              color: Color.fromRGBO(74, 55, 73, 1),
-                              fontWeight: FontWeight.w500,
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
                             ),
+                          );
+                        },
+                        child: const Text(
+                          "Back to Login",
+                          style: TextStyle(
+                            color: Color.fromRGBO(74, 55, 73, 1),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
