@@ -67,6 +67,7 @@ flutter:
     - assets/images/
     - assets/images/background/
     - assets/images/svg/
+    - assets/images/svg/icons/
     - assets/images/social/
 
 

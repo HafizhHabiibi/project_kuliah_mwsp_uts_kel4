@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 
 class RewardsPage extends StatefulWidget {
   const RewardsPage({super.key});
@@ -58,10 +59,16 @@ class _RewardsPageState extends State<RewardsPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: Icon(Icons.more_vert, color: appBarTextColor),
+            child: Builder(
+              builder: (context) => IconButton(
+                icon: Icon(Icons.more_vert, color: appBarTextColor),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
           ),
         ],
       ),
+      drawer: const SideBar(),
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Column(
