@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'forget_pass_screen.dart';
 import 'register_form_screen.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/dummy/main_page_dummy.dart';
+// import 'package:project_kuliah_mwsp_uts_kel4/dummy/main_page_dummy.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/main_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -154,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomePage(),
+                              builder: (context) => const MainPage(),
                             ),
                           );
                         },

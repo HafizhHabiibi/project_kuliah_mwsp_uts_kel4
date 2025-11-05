@@ -71,6 +71,8 @@ flutter:
     - assets/images/svg/icons/
     - assets/images/social/
     - assets/images/cart/
+    - assets/images/profile/
+    - assets/images/menus/
 
 
   # To add assets to your application, add an assets section, like this:

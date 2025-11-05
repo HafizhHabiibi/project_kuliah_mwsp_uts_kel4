@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 
 class RewardsPage extends StatefulWidget {
   const RewardsPage({super.key});
@@ -59,192 +58,202 @@ class _RewardsPageState extends State<RewardsPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: Builder(
-              builder: (context) => IconButton(
-                icon: Icon(Icons.more_vert, color: appBarTextColor),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
-            ),
+            child: Icon(Icons.more_vert, color: appBarTextColor),
           ),
         ],
       ),
-      drawer: const SideBar(),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            // Box reward tetap coklat
-            Container(
-              padding: const EdgeInsets.only(top: 100, bottom: 40),
-              decoration: const BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(22),
-                  bottomRight: Radius.circular(22),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/svg/gift.svg',
-                        height: 150,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 24,
-                          ),
-                          decoration: BoxDecoration(
-                            color: secondaryColor,
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: const Text(
-                            '80 Pts',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  const Text(
-                    "Weekly Coffee Challenge",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+
+      body: Stack(
+        children: [
+          // Background putih di bawah
+          Container(color: Colors.white),
+
+          // Konten scroll
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              children: [
+                // 🟤 Bagian Coklat (Reward + Progress)
+                Container(
+                  padding: const EdgeInsets.only(top: 100, bottom: 40),
+                  decoration: const BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(22),
+                      bottomRight: Radius.circular(22),
                     ),
                   ),
-                  const SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: const TextSpan(
+                  child: Column(
+                    children: [
+                      // 🎁 Reward Section
+                      Stack(
+                        alignment: Alignment.center,
                         children: [
-                          TextSpan(
-                            text:
-                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et",
-                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          SvgPicture.asset(
+                            'assets/images/svg/gift.svg',
+                            height: 150,
                           ),
-                          TextSpan(
-                            text: " Read More",
-                            style: TextStyle(
-                              color: secondaryColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                          Positioned(
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 24,
+                              ),
+                              decoration: BoxDecoration(
+                                color: secondaryColor,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: const Text(
+                                '80 Pts',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Progress Section
-            Container(
-              color: primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "Progress",
+                      const SizedBox(height: 25),
+                      const Text(
+                        "Weekly Coffee Challenge",
                         style: TextStyle(
                           color: Colors.white,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
-                      Text(
-                        "2 order left",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(5, (index) {
-                      bool active = index < 3;
-                      return Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 5),
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: active
-                                ? secondaryColor
-                                : Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(25),
+                      const SizedBox(height: 15),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text:
+                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              TextSpan(
+                                text: " Read More",
+                                style: TextStyle(
+                                  color: secondaryColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
+                      ),
+                      const SizedBox(height: 40),
 
-            const SizedBox(height: 40),
-
-            // History Rewards
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25),
-                  topRight: Radius.circular(25),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "History Reward",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                      // 📊 Progress Section — masih di dalam container coklat
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 25,
+                          vertical: 10,
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                Text(
+                                  "Progress",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  "2 order left",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(5, (index) {
+                                bool active = index < 3;
+                                return Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: active
+                                          ? secondaryColor
+                                          : Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
                         ),
                       ),
-                      Text("More", style: TextStyle(color: Colors.black54)),
                     ],
                   ),
-                  const SizedBox(height: 25),
-                  rewardCard(
-                    title: "Buy 10 Brewed Coffee Packages",
-                    points: "40 Pts",
+                ),
+
+                const SizedBox(height: 20), // jarak antar coklat dan history
+                // ⚪ History Rewards (posisi rapi)
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            "History Reward",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          Text(
+                            "More",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold, // dibuat tebal
+                              fontSize: 14,
+                              color: Color(
+                                0xFF3A2D46,
+                              ), // sama seperti primaryColor
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 25),
+                      rewardCard(
+                        title: "Buy 10 Brewed Coffee Packages",
+                        points: "40 Pts",
+                      ),
+                      rewardCard(
+                        title: "Extra Deluxe Gayo Coffee Packages",
+                        points: "90 Pts",
+                      ),
+                      const SizedBox(height: 50),
+                    ],
                   ),
-                  rewardCard(
-                    title: "Extra Deluxe Gayo Coffee Packages",
-                    points: "90 Pts",
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ), // padding bawah agar scroll lebih jauh
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
