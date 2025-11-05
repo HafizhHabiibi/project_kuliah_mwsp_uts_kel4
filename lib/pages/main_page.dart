@@ -230,21 +230,21 @@ class _MainPageState extends State<MainPage> {
                       physics: const BouncingScrollPhysics(),
                       children: [
                         _buildFeaturedCard(
-                          image: "assets/images/menus/pic1.jpg",
+                          image: "assets/images/menus/slide/pic1.jpg",
                           category: "Tea",
                           name: "Hot Sweet Indonesian Tea",
                           price: "\$5.8",
                           rating: 4.0,
                         ),
                         _buildFeaturedCard(
-                          image: "assets/images/menus/pic2.jpg",
+                          image: "assets/images/menus/slide/pic2.jpg",
                           category: "Coffee",
                           name: "Mocha Coffee Creamy Milky",
                           price: "\$6.2",
                           rating: 4.5,
                         ),
                         _buildFeaturedCard(
-                          image: "assets/images/menus/pic3.jpg",
+                          image: "assets/images/menus/slide/pic3.jpg",
                           category: "Tea",
                           name: "Iced Lemon Tea Fresh",
                           price: "\$4.0",
