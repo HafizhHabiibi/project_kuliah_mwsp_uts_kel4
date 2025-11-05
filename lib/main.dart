@@ -13,12 +13,8 @@ class BijiApp extends StatelessWidget {
     return MaterialApp(
       title: 'Biji Coffee Shop',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Poppins',
-        primaryColor: const Color(0xFF309f5f),
-        scaffoldBackgroundColor: Colors.white,
-      ),
+      theme: ThemeData(fontFamily: 'Poppins'),
       home: const OnboardingScreen(),
     );
-  }
+  } 
 }

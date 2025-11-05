@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_form_screen.dart';
-import '../pages/main_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/screen/login_form_screen.dart';
 
 class RegisterFormScreen extends StatefulWidget {
   const RegisterFormScreen({super.key});
@@ -55,10 +54,13 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
       backgroundColor: Colors.black.withOpacity(0.3),
       body: Stack(
         children: [
+          // Background gelap transparan — klik di luar popup untuk menutup
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(color: const Color.fromRGBO(74, 55, 73, 1)),
           ),
+
+          // Popup Form Register
           Align(
             alignment: Alignment.bottomCenter,
             child: SlideTransition(
@@ -74,10 +76,11 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Align(
+                      // Judul
+                      Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Create Account",
+                        child: const Text(
+                          "Sign Up",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -87,15 +90,17 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        "Please fill in the form to continue",
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+                        textAlign: TextAlign.left,
                         style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                       const SizedBox(height: 24),
 
-                      const Align(
+                      // Username
+                      Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Full Name',
+                        child: const Text(
+                          'Username',
                           style: TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ),
@@ -103,7 +108,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       TextField(
                         controller: _usernameController,
                         decoration: InputDecoration(
-                          hintText: 'Enter your name',
+                          hintText: 'Roberto Karlos',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
@@ -111,9 +116,10 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       ),
                       const SizedBox(height: 16),
 
-                      const Align(
+                      // Email
+                      Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
+                        child: const Text(
                           'Email',
                           style: TextStyle(fontSize: 14, color: Colors.black54),
                         ),
@@ -122,7 +128,8 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          hintText: 'Enter your email',
+                          hintText: 'Email Address',
+                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
@@ -130,9 +137,10 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       ),
                       const SizedBox(height: 16),
 
-                      const Align(
+                      // Password
+                      Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
+                        child: const Text(
                           'Password',
                           style: TextStyle(fontSize: 14, color: Colors.black54),
                         ),
@@ -143,6 +151,7 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Password',
+                          hintStyle: TextStyle(color: Color.fromRGBO(74, 55, 73, 0.5)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -159,14 +168,10 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                       ),
                       const SizedBox(height: 24),
 
+                      // Tombol REGISTER
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainPage(),
-                            ),
-                          );
+                          Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
@@ -184,20 +189,41 @@ class _RegisterFormScreenState extends State<RegisterFormScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TextButton(
+                      const SizedBox(height: 20),
+
+                      // Sudah punya akun?
+                      const Text(
+                        "Already have an account?",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Tombol Sign In
+                      ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
+                          Navigator.pop(context);
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            showModalBottomSheet(
+                              context: context,
+                              backgroundColor: Colors.transparent,
+                              isScrollControlled: true,
+                              useSafeArea: true,
+                              enableDrag: true,
                               builder: (context) => const LoginScreen(),
-                            ),
-                          );
+                            );
+                          });
                         },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          backgroundColor: Color.fromRGBO(229, 229, 229, 1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
                         child: const Text(
-                          "Already have an account? Login",
+                          "SIGN IN",
                           style: TextStyle(
-                            color: Color.fromRGBO(74, 55, 73, 1),
+                            color: Color.fromRGBO(100, 100, 100, 1),
                           ),
                         ),
                       ),
