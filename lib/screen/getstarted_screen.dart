@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/screen/welcome_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
