@@ -4,7 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/bottom_bar.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/detail_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/pages/product_page.dart'; // ✅ tambahkan import ini
+import 'package:project_kuliah_mwsp_uts_kel4/pages/product_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/notifications_page.dart';
 
 class MainPage extends StatefulWidget {
   final String? profileImagePath;
@@ -39,46 +40,61 @@ class _MainPageState extends State<MainPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Good Morning",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.userName,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color.fromRGBO(34, 34, 34, 1),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: _buildProfileImage(),
-                          ),
-                          Positioned(
-                            right: 2,
-                            top: 2,
-                            child: Container(
-                              height: 10,
-                              width: 10,
-                              decoration: const BoxDecoration(
-                                color: Colors.orange,
-                                shape: BoxShape.circle,
+                      // Klik pada nama untuk ke notifikasi
+                      InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () {
+                          Navigator.of(context).push(_createFadeRoute());
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Good Morning",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
                               ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.userName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromRGBO(34, 34, 34, 1),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Klik pada foto profil untuk ke notifikasi
+                      InkWell(
+                        borderRadius: BorderRadius.circular(50),
+                        onTap: () {
+                          Navigator.of(context).push(_createFadeRoute());
+                        },
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: _buildProfileImage(),
+                            ),
+                            Positioned(
+                              right: 2,
+                              top: 2,
+                              child: Container(
+                                height: 10,
+                                width: 10,
+                                decoration: const BoxDecoration(
+                                  color: Colors.orange,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -92,27 +108,27 @@ class _MainPageState extends State<MainPage> {
                       const Text(
                         "Promotion",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(34, 34, 34, 1),
-                          ),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromRGBO(34, 34, 34, 1),
                         ),
-                        InkWell(
+                      ),
+                      InkWell(
                         onTap: () {
                           Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                              ProductPage(categoryName: 'All'),
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductPage(categoryName: 'All'),
                             ),
                           );
                         },
                         child: const Text(
                           "More",
                           style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color.fromRGBO(74, 55, 73, 1),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromRGBO(74, 55, 73, 1),
                           ),
                         ),
                       ),
@@ -283,6 +299,18 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  // ===== ANIMASI FADE UNTUK PINDAH HALAMAN =====
+  Route _createFadeRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const NotificationsPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      transitionDuration: const Duration(milliseconds: 400),
+    );
+  }
+
   // ===== FOTO PROFIL =====
   Widget _buildProfileImage() {
     if (widget.profileImagePath != null &&
@@ -402,7 +430,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // ===== KATEGORI CARD (DIBUNGKUS DENGAN InkWell UNTUK NAVIGASI) =====
+  // ===== KATEGORI CARD =====
   Widget _buildCategoryCard({
     required String svgPath,
     required String title,
@@ -411,7 +439,6 @@ class _MainPageState extends State<MainPage> {
     return InkWell(
       borderRadius: BorderRadius.circular(22),
       onTap: () {
-        // ✅ Navigasi ke halaman ProductPage saat kategori ditekan
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -471,7 +498,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // ===== FEATURED CARD (tidak diubah) =====
+  // ===== FEATURED CARD =====
   Widget _buildFeaturedCard({
     required String image,
     required String category,
