@@ -56,7 +56,7 @@ class _DetailPageState extends State<DetailPage> {
               centerTitle: true,
               leading: IconButton(
                 icon: Icon(
-                  Icons.arrow_back_ios_new,
+                  Icons.arrow_back,
                   color: isScrolled ? Colors.black : Colors.white,
                 ),
                 onPressed: () => Navigator.pop(context),
