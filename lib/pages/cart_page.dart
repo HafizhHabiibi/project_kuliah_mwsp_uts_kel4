@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/detail_page.dart';
 import 'checkout_page.dart';
 
 class CartPage extends StatefulWidget {
@@ -95,7 +96,7 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const SideBar(), // ✅ Tambahkan sidebar di sini
+      drawer: const SideBar(),
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -105,7 +106,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
           builder: (context) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 🔹 Tombol Back
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: const Icon(
@@ -114,8 +114,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                   size: 26,
                 ),
               ),
-
-              // 🔹 Judul Cart di tengah
               const Text(
                 "Cart",
                 style: TextStyle(
@@ -124,8 +122,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                   fontSize: 20,
                 ),
               ),
-
-              // 🔹 Ikon titik tiga di kanan untuk buka sidebar
               GestureDetector(
                 onTap: () => Scaffold.of(context).openDrawer(),
                 child: const Icon(
@@ -141,7 +137,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
 
       body: Column(
         children: [
-          // 🔹 Search Bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -164,7 +159,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
             ),
           ),
 
-          // 🔹 Tab Bar
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
@@ -195,7 +189,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
 
           const SizedBox(height: 10),
 
-          // 🔹 List isi keranjang + note
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -209,7 +202,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
         ],
       ),
 
-      // 🔹 Tombol “Place Order”
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
@@ -264,7 +256,7 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                     ),
                   ),
                   TextSpan(
-                    text: "-Swipe to delete Cart Items",
+                    text: "Swipe to delete Cart Items",
                     style: TextStyle(
                       color: Colors.grey,
                       fontStyle: FontStyle.italic,
@@ -298,75 +290,84 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
             padding: const EdgeInsets.only(right: 20),
             child: const Icon(Icons.delete, color: Colors.white),
           ),
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    item["image"],
-                    width: 95,
-                    height: 95,
-                    fit: BoxFit.cover,
+          child: GestureDetector(
+            onTap: () {
+              // 👇 Navigasi ke halaman Detail
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DetailPage()),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
                   ),
-                ),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item["title"],
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      item["image"],
+                      width: 95,
+                      height: 95,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item["title"],
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "\$${item["price"]}",
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15,
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "\$${item["price"]}",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 15,
+                              ),
                             ),
-                          ),
-                          Text(
-                            "${item["qty"]}x",
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15,
+                            Text(
+                              "${item["qty"]}x",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 15,
+                              ),
                             ),
-                          ),
-                          Text(
-                            "\$${(item["price"] * item["qty"]).toStringAsFixed(1)}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                            Text(
+                              "\$${(item["price"] * item["qty"]).toStringAsFixed(1)}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
