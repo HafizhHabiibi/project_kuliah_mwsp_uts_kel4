@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/bottom_bar.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/detail_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/product_page.dart'; // ✅ tambahkan import ini
 
 class MainPage extends StatefulWidget {
   final String? profileImagePath;
@@ -28,15 +29,9 @@ class _MainPageState extends State<MainPage> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // ===== KONTEN UTAMA =====
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                20,
-                20,
-                100,
-              ), // kasih padding bawah biar gak ketutup bottom bar
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -396,7 +391,76 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // ===== FEATURED CARD =====
+  // ===== KATEGORI CARD (DIBUNGKUS DENGAN InkWell UNTUK NAVIGASI) =====
+  Widget _buildCategoryCard({
+    required String svgPath,
+    required String title,
+    required String subtitle,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(22),
+      onTap: () {
+        // ✅ Navigasi ke halaman ProductPage saat kategori ditekan
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductPage(categoryName: title),
+          ),
+        );
+      },
+      child: Container(
+        width: 150,
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A3749), Color(0xFF24182E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              bottom: -20,
+              height: 100,
+              width: 100,
+              child: Opacity(
+                opacity: 0.15,
+                child: SvgPicture.asset(svgPath, color: Colors.white),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(svgPath, height: 32, color: Colors.white),
+                  const SizedBox(height: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===== FEATURED CARD (tidak diubah) =====
   Widget _buildFeaturedCard({
     required String image,
     required String category,
@@ -407,7 +471,6 @@ class _MainPageState extends State<MainPage> {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
-        // Navigasi ke halaman detail
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const DetailPage()),
@@ -514,14 +577,13 @@ class _MainPageState extends State<MainPage> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(15),
                   onTap: () {
-                    // Navigasi ke halaman keranjang
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const CartPage()),
                     );
                   },
                   child: Container(
-                    width: 55, // box agak besar
+                    width: 55,
                     height: 55,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -534,11 +596,11 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(8), // logo kecil, box besar
+                    padding: const EdgeInsets.all(8),
                     child: const Icon(
                       Icons.shopping_bag_outlined,
                       color: Color(0xFF4A3749),
-                      size: 24, // ukuran icon kecil
+                      size: 24,
                     ),
                   ),
                 ),
@@ -546,63 +608,6 @@ class _MainPageState extends State<MainPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // ===== KATEGORI CARD (SVG) =====
-  Widget _buildCategoryCard({
-    required String svgPath,
-    required String title,
-    required String subtitle,
-  }) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(right: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4A3749), Color(0xFF24182E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -20,
-            bottom: -20,
-            height: 100,
-            width: 100,
-            child: Opacity(
-              opacity: 0.15,
-              child: SvgPicture.asset(svgPath, color: Colors.white),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(svgPath, height: 32, color: Colors.white),
-                const SizedBox(height: 10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
