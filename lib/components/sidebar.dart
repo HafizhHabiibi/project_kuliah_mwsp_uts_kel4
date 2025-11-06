@@ -7,6 +7,7 @@ import 'package:project_kuliah_mwsp_uts_kel4/pages/notifications_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/order_reviews_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/reward_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/wishlist_screen.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/setting_page.dart'; // ⬅️ tambahkan import ini
 import 'package:project_kuliah_mwsp_uts_kel4/screen/welcome_screen.dart';
 
 class SideBar extends StatelessWidget {
@@ -36,16 +37,14 @@ class SideBar extends StatelessWidget {
                       color: Colors.black,
                     ),
                   ),
-                  // Close button in a bordered circle (matching design)
+                  // Close button in a bordered circle
                   Container(
                     width: 22,
                     height: 22,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                      ),
+                      border: Border.all(color: Colors.black),
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
@@ -73,9 +72,7 @@ class SideBar extends StatelessWidget {
                     selected: true,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => MainPage(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const MainPage()),
                     ),
                   ),
                   _MenuItem(
@@ -96,9 +93,7 @@ class SideBar extends StatelessWidget {
                     title: 'Shop Cart',
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => CartPage(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const CartPage()),
                     ),
                   ),
                   _MenuItem(
@@ -110,7 +105,9 @@ class SideBar extends StatelessWidget {
                     title: 'Wishlist',
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => WishlistScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const WishlistScreen(),
+                      ),
                     ),
                   ),
                   _MenuItem(
@@ -123,7 +120,7 @@ class SideBar extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => NotificationsPage(),
+                        builder: (context) => const NotificationsPage(),
                       ),
                     ),
                   ),
@@ -154,7 +151,9 @@ class SideBar extends StatelessWidget {
                     title: 'Rewards',
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => RewardsPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const RewardsPage(),
+                      ),
                     ),
                   ),
                   _MenuItem(
@@ -176,7 +175,7 @@ class SideBar extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => OrderReviewsPage(),
+                        builder: (context) => const OrderReviewsPage(),
                       ),
                     ),
                   ),
@@ -189,7 +188,9 @@ class SideBar extends StatelessWidget {
                     title: 'Message',
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MessagesPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const MessagesPage(),
+                      ),
                     ),
                   ),
                   _MenuItem(
@@ -201,6 +202,8 @@ class SideBar extends StatelessWidget {
                     title: 'Elements',
                     onTap: () => Navigator.pop(context),
                   ),
+
+                  // 🛠️ Setting Page (ini yang diperbaiki)
                   _MenuItem(
                     leading: SvgPicture.asset(
                       'assets/images/svg/icons/setting_icon.svg',
@@ -208,9 +211,15 @@ class SideBar extends StatelessWidget {
                       height: 24,
                     ),
                     title: 'Setting',
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingPage(),
+                      ),
+                    ),
                   ),
-                    _MenuItem(
+
+                  _MenuItem(
                     leading: SvgPicture.asset(
                       'assets/images/svg/icons/logout_icon.svg',
                       width: 24,
@@ -220,12 +229,15 @@ class SideBar extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context); // close drawer
                       Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => WelcomeScreen()),
-                      (route) => false,
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const WelcomeScreen(),
+                        ),
+                        (route) => false,
                       );
                     },
                   ),
+
                   // Footer
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -234,7 +246,7 @@ class SideBar extends StatelessWidget {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: const [
                         Text(
                           'Biji - Coffee Shop',
                           style: TextStyle(
@@ -242,7 +254,7 @@ class SideBar extends StatelessWidget {
                             color: Color.fromRGBO(177, 177, 195, 1),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           'App Version 1.0.1',
                           style: TextStyle(
@@ -280,17 +292,12 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedBg = const Color.fromRGBO(
-      229,
-      218,
-      229,
-      1,
-    ); // soft purple background
+    final Color selectedBg = const Color.fromRGBO(229, 218, 229, 1);
     final Color iconColor = selected
-        ? Color.fromRGBO(74, 55, 73, 1)
+        ? const Color.fromRGBO(74, 55, 73, 1)
         : Colors.grey.shade400;
     final Color textColor = selected
-        ? Color.fromRGBO(74, 55, 73, 1)
+        ? const Color.fromRGBO(74, 55, 73, 1)
         : Colors.grey.shade600;
 
     Widget leadingWidget;
