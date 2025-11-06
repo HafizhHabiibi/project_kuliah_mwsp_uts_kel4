@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 import 'checkout_page.dart';
 
 class CartPage extends StatefulWidget {
@@ -12,7 +13,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
 
-  // ✅ Data diperbaiki
   List<Map<String, dynamic>> allItems = [
     {
       "title": "Hot Sweet Indonesian Tea",
@@ -80,7 +80,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
     super.initState();
   }
 
-  /// ✅ Logika filter diperbaiki
   List<Map<String, dynamic>> getFilteredItems(String status) {
     return allItems.where((item) {
       bool matchesSearch = item["title"].toString().toLowerCase().contains(
@@ -96,13 +95,50 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const SideBar(), // ✅ Tambahkan sidebar di sini
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Cart", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        automaticallyImplyLeading: false,
+        title: Builder(
+          builder: (context) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 🔹 Tombol Back
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                  size: 26,
+                ),
+              ),
+
+              // 🔹 Judul Cart di tengah
+              const Text(
+                "Cart",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+
+              // 🔹 Ikon titik tiga di kanan untuk buka sidebar
+              GestureDetector(
+                onTap: () => Scaffold.of(context).openDrawer(),
+                child: const Icon(
+                  Icons.more_vert,
+                  color: Colors.black,
+                  size: 26,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
+
       body: Column(
         children: [
           // 🔹 Search Bar
@@ -199,7 +235,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
     );
   }
 
-  /// 🔹 Menampilkan daftar + note
   Widget buildCartListWithNote(String status) {
     var items = getFilteredItems(status);
 
@@ -208,22 +243,17 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
     }
 
     return ListView.separated(
-      itemCount: items.length + 1, // +1 untuk note di akhir
-      separatorBuilder: (context, index) {
-        if (index < items.length) {
-          return const Divider(color: Color(0xFFE0E0E0), height: 1);
-        }
-        return const SizedBox.shrink();
-      },
+      itemCount: items.length + 1,
+      separatorBuilder: (context, index) => index < items.length
+          ? const Divider(color: Color(0xFFE0E0E0), height: 1)
+          : const SizedBox.shrink(),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemBuilder: (context, index) {
         if (index == items.length) {
-          // ✅ NOTE di bawah card terakhir
           return Padding(
-            padding: EdgeInsets.only(top: 8, left: 4),
+            padding: const EdgeInsets.only(top: 8, left: 4),
             child: RichText(
-              textAlign: TextAlign.left,
-              text: TextSpan(
+              text: const TextSpan(
                 children: [
                   TextSpan(
                     text: "Note: ",
