@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -43,7 +44,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             IconButton(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(
-                Icons.arrow_back_ios,
+                Icons.arrow_back,
                 color: Colors.black,
                 size: 22,
               ),
@@ -60,13 +61,21 @@ class _CheckoutPageState extends State<CheckoutPage>
                 ),
               ),
             ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.more_vert, color: Colors.black),
-            ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.more_vert, color: Colors.black87),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+          ),
+        ],
       ),
+      drawer: const SideBar(),
 
       // ---------------- BODY ----------------
       body: Column(

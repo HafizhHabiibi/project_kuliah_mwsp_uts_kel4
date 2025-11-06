@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/checkout_page.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
@@ -222,20 +223,31 @@ class _DetailPageState extends State<DetailPage> {
                         const SizedBox(height: 20),
 
                         // Place Order Button
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          decoration: BoxDecoration(
-                            color: Colors.brown.shade700,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'PLACE ORDER  \$${totalPrice.toStringAsFixed(1)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
+                        // make sure to import your checkout page, e.g.:
+                        // import 'package:your_app/pages/checkout_page.dart';
+
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => CheckoutPage()),
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            decoration: BoxDecoration(
+                              color: Colors.brown.shade700,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'PLACE ORDER  \$${totalPrice.toStringAsFixed(1)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
                               ),
                             ),
                           ),

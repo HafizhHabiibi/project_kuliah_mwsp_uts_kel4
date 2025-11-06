@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/main_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/messages_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/notifications_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/order_reviews_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/reward_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/wishlist_screen.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/screen/welcome_screen.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({super.key});
@@ -68,7 +71,12 @@ class SideBar extends StatelessWidget {
                     ),
                     title: 'Home',
                     selected: true,
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MainPage(),
+                      ),
+                    ),
                   ),
                   _MenuItem(
                     leading: SvgPicture.asset(
@@ -86,7 +94,12 @@ class SideBar extends StatelessWidget {
                       height: 24,
                     ),
                     title: 'Shop Cart',
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CartPage(),
+                      ),
+                    ),
                   ),
                   _MenuItem(
                     leading: SvgPicture.asset(
@@ -197,14 +210,21 @@ class SideBar extends StatelessWidget {
                     title: 'Setting',
                     onTap: () => Navigator.pop(context),
                   ),
-                  _MenuItem(
+                    _MenuItem(
                     leading: SvgPicture.asset(
                       'assets/images/svg/icons/logout_icon.svg',
                       width: 24,
                       height: 24,
                     ),
                     title: 'Logout',
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context); // close drawer
+                      Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                      (route) => false,
+                      );
+                    },
                   ),
                   // Footer
                   Padding(
