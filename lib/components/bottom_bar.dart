@@ -2,19 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/reward_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
 
-class BottomNavOverlay extends StatelessWidget {
-  final int selectedIndex;
-  final Function(int) onItemTapped;
+class BottomNavOverlay extends StatefulWidget {
+  final int? selectedIndex;
+  final Function(int)? onItemTapped;
 
-  const BottomNavOverlay({
-    super.key,
-    required this.selectedIndex,
-    required this.onItemTapped,
-  });
+  const BottomNavOverlay({super.key, this.selectedIndex, this.onItemTapped});
+
+  @override
+  State<BottomNavOverlay> createState() => _BottomNavOverlayState();
+}
+
+class _BottomNavOverlayState extends State<BottomNavOverlay> {
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex ?? 0; // default icon rumah aktif
+  }
+
+  void _handleTap(BuildContext context, int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    widget.onItemTapped?.call(index);
+
+    if (index == 1) {
+      // Navigasi ke CartPage, dan reset ke Home setelah kembali
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CartPage()),
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0; // balik ke Home icon aktif
+        });
+      });
+    } else if (index == 2) {
+      // Navigasi ke RewardsPage, dan reset ke Home setelah kembali
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RewardsPage()),
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0; // balik ke Home icon aktif
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    const Color activeColor = Color(0xFF3E1F47); // ungu tua seperti di gambar
+    const Color activeColor = Color(0xFF3E1F47);
     const Color inactiveColor = Colors.grey;
 
     return Container(
@@ -75,28 +114,11 @@ class BottomNavOverlay extends StatelessWidget {
     Color inactive,
   ) {
     return GestureDetector(
-      onTap: () {
-        onItemTapped(index);
-
-        // 👇 Tambahkan aksi navigasi di sini
-        if (index == 1) {
-          // icon tas belanja → CartPage
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CartPage()),
-          );
-        } else if (index == 2) {
-          // icon toko → RewardPage
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const RewardsPage()),
-          );
-        }
-      },
+      onTap: () => _handleTap(context, index),
       child: Icon(
         icon,
         size: 28,
-        color: selectedIndex == index ? active : inactive,
+        color: _selectedIndex == index ? active : inactive,
       ),
     );
   }
