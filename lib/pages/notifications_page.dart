@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/profile_page.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -9,7 +10,6 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> notifications = [
@@ -17,49 +17,51 @@ class _NotificationsPageState extends State<NotificationsPage> {
         "title": "Apply Success",
         "text": "You have applied for a job in Queenify Group as UI Designer",
         "time": "10h ago",
-        "status": "success"
+        "status": "success",
       },
       {
         "title": "Interview Calls",
         "text": "Congratulations! You have interview calls",
         "time": "9h ago",
-        "status": "success"
+        "status": "success",
       },
       {
         "title": "Apply Success",
         "text": "You have applied for a job in Queenify Group as UI Designer",
         "time": "8h ago",
-        "status": "normal"
+        "status": "normal",
       },
       {
         "title": "Complete your profile",
-        "text": "Please verify your profile information to continue using this app",
+        "text":
+            "Please verify your profile information to continue using this app",
         "time": "4h ago",
-        "status": "normal"
+        "status": "normal",
       },
       {
         "title": "Apply Success",
         "text": "You have applied for a job in Queenify Group as UI Designer",
         "time": "10h ago",
-        "status": "normal"
+        "status": "normal",
       },
       {
         "title": "Interview Calls",
         "text": "Congratulations! You have interview calls",
         "time": "9h ago",
-        "status": "normal"
+        "status": "normal",
       },
       {
         "title": "Apply Success",
         "text": "You have applied for a job in Queenify Group as UI Designer",
         "time": "8h ago",
-        "status": "normal"
+        "status": "normal",
       },
       {
         "title": "Complete your profile",
-        "text": "Please verify your profile information to continue using this app",
+        "text":
+            "Please verify your profile information to continue using this app",
         "time": "4h ago",
-        "status": "normal"
+        "status": "normal",
       },
     ];
 
@@ -89,7 +91,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
               height: 24,
               color: const Color(0xFF222222),
             ),
-            onPressed: () {},
+            // 👉 Saat ditekan, pindah ke halaman profil
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              );
+            },
           ),
         ],
       ),
@@ -101,30 +109,28 @@ class _NotificationsPageState extends State<NotificationsPage> {
           itemBuilder: (context, index) {
             final notif = notifications[index];
             return Container(
-                margin: const EdgeInsets.only(bottom: 14),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                    ),
-                  ),
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade300, width: 1),
                 ),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 🔵 Icon status
                   notif["status"] == "success"
-                    ? Container(
-                      margin: const EdgeInsets.only(right: 12, top: 2),
-                      child: const Icon(
-                        Icons.circle,
-                        size: 12,
-                        color: Color.fromARGB(255, 55, 183, 175),
-                      ),
-                      )
-                    : const SizedBox.shrink(),
+                      ? Container(
+                          margin: const EdgeInsets.only(right: 12, top: 2),
+                          child: const Icon(
+                            Icons.circle,
+                            size: 12,
+                            color: Color.fromARGB(255, 55, 183, 175),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+
                   // 🧾 Text content
                   Expanded(
                     child: Column(
