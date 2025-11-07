@@ -10,6 +10,7 @@ import 'package:project_kuliah_mwsp_uts_kel4/pages/reward_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/wishlist_screen.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/setting_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/elements_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/store_locations_page.dart'; // ✅ Tambahkan ini
 import 'package:project_kuliah_mwsp_uts_kel4/screen/welcome_screen.dart';
 
 class SideBar extends StatelessWidget {
@@ -125,6 +126,8 @@ class SideBar extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // ✅ Ubah bagian ini untuk navigasi ke StoreLocationsPage
                   _MenuItem(
                     leading: SvgPicture.asset(
                       'assets/images/svg/icons/store_location_icon.svg',
@@ -132,8 +135,14 @@ class SideBar extends StatelessWidget {
                       height: 24,
                     ),
                     title: 'Store Locations',
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const StoreLocationsPage(),
+                      ),
+                    ),
                   ),
+
                   _MenuItem(
                     leading: SvgPicture.asset(
                       'assets/images/svg/icons/delivery_tracking_icon.svg',
@@ -199,7 +208,6 @@ class SideBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // ✅ ElementsPage route sudah benar
                   _MenuItem(
                     leading: SvgPicture.asset(
                       'assets/images/svg/icons/elements_icon.svg',
@@ -236,7 +244,7 @@ class SideBar extends StatelessWidget {
                     ),
                     title: 'Logout',
                     onTap: () {
-                      Navigator.pop(context); // Close drawer
+                      Navigator.pop(context);
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
@@ -248,14 +256,11 @@ class SideBar extends StatelessWidget {
                   ),
 
                   // === FOOTER ===
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Biji - Coffee Shop',
                           style: TextStyle(

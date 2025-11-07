@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/messages_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/detail_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/store_locations_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,14 +15,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _rotateController;
-  bool showCallSection = false; // 🔹 toggle section
+  bool showCallSection = false;
 
   @override
   void initState() {
     super.initState();
-    _rotateController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 10))
-          ..repeat();
+    _rotateController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
   }
 
   @override
@@ -36,15 +39,18 @@ class _ProfilePageState extends State<ProfilePage>
       drawer: const SideBar(),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(children: [
+          child: Column(
+            children: [
               // 🔹 App Bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Colors.white),
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const Expanded(
@@ -62,7 +68,10 @@ class _ProfilePageState extends State<ProfilePage>
                       padding: const EdgeInsets.only(right: 0),
                       child: Builder(
                         builder: (context) => IconButton(
-                          icon: const Icon(Icons.more_vert, color: Colors.white),
+                          icon: const Icon(
+                            Icons.more_vert,
+                            color: Colors.white,
+                          ),
                           onPressed: () => Scaffold.of(context).openDrawer(),
                         ),
                       ),
@@ -113,7 +122,9 @@ class _ProfilePageState extends State<ProfilePage>
                     bottom: 0,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color.fromRGBO(125, 91, 124, 1),
                         borderRadius: BorderRadius.circular(16),
@@ -159,18 +170,19 @@ class _ProfilePageState extends State<ProfilePage>
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                  children: [
                     _circleAction(
                       svgPath: 'assets/images/svg/icons/call_icon.svg',
                       color: const Color(0xFF44474F),
                       isActive: showCallSection,
                       onTap: () {
-                      setState(() {
-                        showCallSection = true;
-                      });
+                        setState(() {
+                          showCallSection = true;
+                        });
                       },
                     ),
                     const SizedBox(width: 12),
+                    // 🔸 MAP ICON → Navigasi ke StoreLocationsPage
                     _circleAction(
                       svgPath: 'assets/images/svg/icons/locate_icon.svg',
                       color: const Color(0xFF44474F),
@@ -178,6 +190,12 @@ class _ProfilePageState extends State<ProfilePage>
                         setState(() {
                           showCallSection = false;
                         });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const StoreLocationsPage(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(width: 12),
@@ -190,19 +208,25 @@ class _ProfilePageState extends State<ProfilePage>
                         });
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const MessagesPage()),
+                          MaterialPageRoute(
+                            builder: (context) => const MessagesPage(),
+                          ),
                         );
                       },
                     ),
                     const SizedBox(width: 12),
                     _circleAction(
                       svgPath: 'assets/images/svg/icons/pen_icon.svg',
-                      color: showCallSection ? const Color(0xFF44474F) : Colors.white,
-                      background: showCallSection ? Colors.white : const Color.fromRGBO(156, 156, 156, 0.5),
+                      color: showCallSection
+                          ? const Color(0xFF44474F)
+                          : Colors.white,
+                      background: showCallSection
+                          ? Colors.white
+                          : const Color.fromRGBO(156, 156, 156, 0.5),
                       onTap: () {
-                      setState(() {
-                        showCallSection = false;
-                      });
+                        setState(() {
+                          showCallSection = false;
+                        });
                       },
                     ),
                   ],
@@ -211,10 +235,9 @@ class _ProfilePageState extends State<ProfilePage>
 
               const SizedBox(height: 30),
 
-              // 🔹 Bottom Section (AnimatedSwitcher for transition)
+              // 🔹 Bottom Section
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 100),
-                // switchInCurve: Curves.easeInOut,
                 child: showCallSection
                     ? _buildCallSection(context)
                     : _buildFavouriteMenus(context),
@@ -241,7 +264,9 @@ class _ProfilePageState extends State<ProfilePage>
         width: 55,
         height: 55,
         decoration: BoxDecoration(
-          color: isActive ? const Color.fromRGBO(156, 156, 156, 0.5) : background,
+          color: isActive
+              ? const Color.fromRGBO(156, 156, 156, 0.5)
+              : background,
           shape: BoxShape.circle,
         ),
         child: Padding(
@@ -280,6 +305,7 @@ class _ProfilePageState extends State<ProfilePage>
             ),
             const SizedBox(height: 15),
             _menuItem(
+              context: context,
               image: "assets/images/menus/list/pic1.jpg",
               title: "Brewed Coppuccino Latte with Creamy Milk",
               category: "Food",
@@ -288,6 +314,7 @@ class _ProfilePageState extends State<ProfilePage>
             ),
             const SizedBox(height: 15),
             _menuItem(
+              context: context,
               image: "assets/images/menus/list/pic2.jpg",
               title: "Melted Omelette with Spicy Chilli",
               category: "Food",
@@ -326,9 +353,7 @@ class _ProfilePageState extends State<ProfilePage>
   Widget _phoneCard(String number) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-      ),
+      decoration: const BoxDecoration(color: Colors.white),
       child: Row(
         children: [
           Container(
@@ -351,8 +376,7 @@ class _ProfilePageState extends State<ProfilePage>
           ),
           const Spacer(),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
               color: Color.fromRGBO(6, 195, 106, 1),
               borderRadius: BorderRadius.circular(8),
@@ -365,98 +389,115 @@ class _ProfilePageState extends State<ProfilePage>
                 fontWeight: FontWeight.bold,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  // 🔹 Menu Item Widget
+  // 🔹 Menu Item Widget (klik menuju DetailPage)
   Widget _menuItem({
+    required BuildContext context,
     required String image,
     required String title,
     required String category,
     required String price,
     required String rating,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 5,
-            spreadRadius: 1,
-            offset: const Offset(0, 3),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              image,
-              width: 65,
-              height: 65,
-              fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DetailPage()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 5,
+              spreadRadius: 1,
+              offset: const Offset(0, 3),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 16)),
-                const SizedBox(height: 3),
-                Text(category,
-                    style: const TextStyle(
-                        fontSize: 14, color: Colors.grey, height: 1.2)),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: const Color.fromRGBO(156, 156, 156, 1),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    SvgPicture.asset(
-                      'assets/images/svg/icons/star_icon.svg',
-                      color: Color.fromRGBO(74, 55, 73, 1),
-                      width: 18,
-                      height: 18,
-                      fit: BoxFit.contain,
-                    ),
-                    Text(
-                      rating,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                image,
+                width: 65,
+                height: 65,
+                fit: BoxFit.cover,
+              ),
             ),
-          )
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    category,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(
+                        price,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: Color.fromRGBO(156, 156, 156, 1),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SvgPicture.asset(
+                        'assets/images/svg/icons/star_icon.svg',
+                        color: const Color.fromRGBO(74, 55, 73, 1),
+                        width: 18,
+                        height: 18,
+                      ),
+                      Text(
+                        rating,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
