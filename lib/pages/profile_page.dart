@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/messages_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/detail_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/pages/store_locations_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -181,6 +182,7 @@ class _ProfilePageState extends State<ProfilePage>
                       },
                     ),
                     const SizedBox(width: 12),
+                    // 🔸 MAP ICON → Navigasi ke StoreLocationsPage
                     _circleAction(
                       svgPath: 'assets/images/svg/icons/locate_icon.svg',
                       color: const Color(0xFF44474F),
@@ -188,6 +190,12 @@ class _ProfilePageState extends State<ProfilePage>
                         setState(() {
                           showCallSection = false;
                         });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const StoreLocationsPage(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(width: 12),
@@ -387,7 +395,7 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  // 🔹 Menu Item Widget (👉 Ditambahkan fungsi klik ke DetailPage)
+  // 🔹 Menu Item Widget (klik menuju DetailPage)
   Widget _menuItem({
     required BuildContext context,
     required String image,
