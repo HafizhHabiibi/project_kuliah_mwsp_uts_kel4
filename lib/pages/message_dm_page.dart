@@ -2,7 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 
 class MessageDmPage extends StatefulWidget {
-  const MessageDmPage({super.key});
+  final int userId;
+  final String userName;
+  final String role;
+  final String avatar;
+  final List<Map<String, dynamic>> initialMessages;
+
+  const MessageDmPage({
+    super.key,
+    required this.userId,
+    required this.userName,
+    required this.role,
+    required this.avatar,
+    required this.initialMessages,
+  });
 
   @override
   State<MessageDmPage> createState() => _MessageDmPageState();
@@ -12,27 +25,26 @@ class _MessageDmPageState extends State<MessageDmPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  List<Map<String, dynamic>> messages = [
-    {
-      "text": "Your order is on my way sir. Please wait in a minutes",
-      "isSent": false,
-      "time": "12:58",
-      "date": "Sunday, Feb 9",
-    },
-    {"text": "OK Bro!", "isSent": true},
-    {"text": "Please call me if you already at my house", "isSent": true},
-  ];
+  late List<Map<String, dynamic>> messages;
+
+  @override
+  void initState() {
+    super.initState();
+    messages = List.from(widget.initialMessages);
+  }
 
   void sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
+
     setState(() {
       messages.add({"text": _messageController.text.trim(), "isSent": true});
       _messageController.clear();
     });
+
     Future.delayed(const Duration(milliseconds: 100), () {
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 100,
-        duration: const Duration(milliseconds: 400),
+        _scrollController.position.maxScrollExtent + 120,
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     });
@@ -43,85 +55,63 @@ class _MessageDmPageState extends State<MessageDmPage> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // APPBAR
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: AppBar(
-          automaticallyImplyLeading: false,
-          elevation: 0.5,
-          backgroundColor: Colors.white,
-          flexibleSpace: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 6),
+      // ✅ SIDEBAR TETAP ADA
+      drawer: const SideBar(),
 
-                  // Profile info (image + name)
-                  Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.asset(
-                          "assets/images/avatar/1.jpg",
-                          width: 45,
-                          height: 45,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            "Roy Leebauf",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            "ID 2445556",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(),
-                ],
+      // ================= APPBAR =================
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Image.asset(
+                widget.avatar,
+                width: 42,
+                height: 42,
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.more_vert, color: Colors.black87),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.userName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
+                Text(
+                  widget.role,
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+              ],
             ),
           ],
         ),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.more_vert, color: Colors.black87),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
+        ],
       ),
-      drawer: const SideBar(),
 
-      // BODY
+      // ================= BODY =================
       body: Column(
         children: [
-          // 🗨️ Chat Messages List
+          // CHAT LIST
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -130,109 +120,65 @@ class _MessageDmPageState extends State<MessageDmPage> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
                 final bool isSent = msg["isSent"] ?? false;
-                final bool isFirst = index == 0;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (isFirst)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: Text(
-                          "${msg["date"] ?? ""}, ${msg["time"] ?? ""}",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color.fromRGBO(68, 71, 79, 1),
-                          ),
-                        ),
-                      ),
-                    Align(
-                      alignment:
-                          isSent ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        constraints: const BoxConstraints(maxWidth: 280),
-                        decoration: BoxDecoration(
-                          color: isSent
-                              ? const Color.fromRGBO(74, 55, 73, 1)
-                              : Color.fromRGBO(225, 207, 167, 1),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(isSent ? 22 : 22),
-                            topRight: Radius.circular(isSent ? 0 : 22),
-                            bottomLeft: Radius.circular(isSent ? 22 : 0),
-                            bottomRight: Radius.circular(isSent ? 22 : 22),
-                          ),
-                        ),
-                        child: Text(
-                          msg["text"],
-                          style: TextStyle(
-                            color: isSent ? Colors.white : Color.fromRGBO(38, 38, 38, 1),
-                            fontSize: 16,
-                            height: 1.4,
-                          ),
-                        ),
+
+                return Align(
+                  alignment: isSent
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    constraints: const BoxConstraints(maxWidth: 280),
+                    decoration: BoxDecoration(
+                      color: isSent
+                          ? const Color(0xFF4A3749) // bubble kita
+                          : const Color(0xFFE1CFA7), // bubble lawan
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(22),
+                        topRight: Radius.circular(isSent ? 0 : 22),
+                        bottomLeft: Radius.circular(isSent ? 22 : 0),
+                        bottomRight: const Radius.circular(22),
                       ),
                     ),
-                  ],
+                    child: Text(
+                      msg["text"],
+                      style: TextStyle(
+                        color: isSent ? Colors.white : const Color(0xFF262626),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
           ),
 
-          // ✍️ MESSAGE INPUT BAR
-            Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-            ),
-            child: SafeArea(
-              top: false,
+          // INPUT
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
               child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Text area with send icon inside the same rounded border
-                Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: Color(0xFFdadada),
-                        width: 1.0,
-                      ),
-                    ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        minLines: 1,
-                        maxLines: 5,
-                        decoration: const InputDecoration(
-                        border: InputBorder.none,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      minLines: 1,
+                      maxLines: 5,
+                      decoration: InputDecoration(
                         hintText: "Type message...",
-                        hintStyle: TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(22),
                         ),
                       ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                      onTap: sendMessage,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(229, 218, 229, 1),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        padding: const EdgeInsets.all(10),
-                        child:
-                          const Icon(Icons.send, color: Color.fromRGBO(74, 55, 73, 1), size: 20),
-                      ),
-                      ),
-                    ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: sendMessage,
                   ),
                 ],
               ),

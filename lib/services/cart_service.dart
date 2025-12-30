@@ -88,7 +88,7 @@ class CartService {
                 nama: item['nama'] ?? 'Unknown Product',
                 gambarUrl: item['gambar_url'],
                 kategori: item['kategori'] ?? 'Unknown',
-                harga: item['harga'] ?? 0,
+                harga: _parsePrice(item['harga']),
                 deskripsi: item['deskripsi'],
               );
               
@@ -317,4 +317,15 @@ class CartService {
 
   // Get current user ID (for debugging)
   String? get currentUserId => _currentUserId;
+
+  // Helper method to parse price from various types (String, int, double)
+  static double _parsePrice(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
+  }
 }

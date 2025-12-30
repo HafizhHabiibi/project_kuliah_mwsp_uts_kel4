@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/main_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
@@ -20,6 +21,11 @@ class _ProductPageState extends State<ProductPage>
   TextEditingController searchController = TextEditingController();
   TabController? _tabController;
   final ProductService _productService = ProductService();
+  final NumberFormat _currencyFmt = NumberFormat.currency(
+    locale: 'en_US',
+    symbol: '\$',
+    decimalDigits: 2,
+  );
 
   List<ProductModel> allProducts = [];
   List<ProductModel> filteredProducts = [];
@@ -467,7 +473,7 @@ class _ProductPageState extends State<ProductPage>
                                                           ),
                                                           const SizedBox(width: 4),
                                                           Text(
-                                                            "Rp ${product.harga.toString()}",
+                                                            _currencyFmt.format(product.harga),
                                                             style: const TextStyle(
                                                               fontSize: 14,
                                                               fontWeight: FontWeight.bold,

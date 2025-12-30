@@ -145,4 +145,9 @@ class AuthService {
     final token = await _apiService.getToken();
     return token != null && token.isNotEmpty;
   }
+
+  // ================= GET TOKEN =================
+  Future<String?> getToken() async {
+    return await _apiService.getToken();
+  }
 }

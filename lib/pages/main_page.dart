@@ -30,8 +30,8 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
   final ProductService _productService = ProductService();
   final NumberFormat _currencyFmt = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp',
+    locale: 'en_US',
+    symbol: '\$',
   );
 
   bool _featuredLoading = true;

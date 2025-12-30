@@ -16,5 +16,5 @@ class BijiApp extends StatelessWidget {
       theme: ThemeData(fontFamily: 'Poppins'),
       home: const OnboardingScreen(),
     );
-  } 
+  }
 }

@@ -16,9 +16,9 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
   late TabController _tabController;
   final CartService _cartService = CartService();
   final NumberFormat _currencyFormat = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
+    locale: 'en_US',
+    symbol: '\$',
+    decimalDigits: 2,
   );
   
   bool _isLoading = false;

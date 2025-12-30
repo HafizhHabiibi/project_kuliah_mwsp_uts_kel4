@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/pages/checkout_page.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/models/product_model.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/services/cart_service.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/services/cart_service.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/services/wishlist_service.dart';
+import '../models/product_model.dart';
 
 class DetailPage extends StatefulWidget {
   final ProductModel product;
-  
+
   const DetailPage({super.key, required this.product});
 
   @override
@@ -17,14 +17,16 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   int quantity = 1;
   String selectedSize = 'MD';
+  bool isScrolled = false;
+  bool isFavorite = false;
 
   final ScrollController _scrollController = ScrollController();
-  bool isScrolled = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _loadFavoriteStatus();
   }
 
   void _scrollListener() {
@@ -39,6 +41,59 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
+  Future<void> _loadFavoriteStatus() async {
+    try {
+      final wishlist = await WishlistService().fetchWishlist();
+      setState(() {
+        isFavorite = wishlist.any((p) => p.idProduk == widget.product.idProduk);
+      });
+    } catch (e) {
+      print('Failed to load wishlist: $e');
+    }
+  }
+
+  Future<void> _toggleWishlist() async {
+    final service = WishlistService();
+    setState(() {
+      // Optimistic UI update
+      isFavorite = !isFavorite;
+    });
+
+    bool success = false;
+
+    try {
+      if (isFavorite) {
+        success = await service.addToWishlist(widget.product.idProduk);
+      } else {
+        success = await service.removeFromWishlist(widget.product.idProduk);
+      }
+    } catch (e) {
+      success = false;
+    }
+
+    if (!success) {
+      // rollback UI kalau gagal
+      setState(() {
+        isFavorite = !isFavorite;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal memperbarui wishlist!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isFavorite ? 'Ditambahkan ke Wishlist!' : 'Dihapus dari Wishlist!',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -47,7 +102,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    double totalPrice = widget.product.harga.toDouble() * (quantity == 0 ? 1 : quantity);
+    double totalPrice =
+        widget.product.harga.toDouble() * (quantity == 0 ? 1 : quantity);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -64,7 +120,8 @@ class _DetailPageState extends State<DetailPage> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      widget.product.gambarUrl != null && widget.product.gambarUrl!.isNotEmpty
+                      widget.product.gambarUrl != null &&
+                              widget.product.gambarUrl!.isNotEmpty
                           ? Image.network(
                               widget.product.gambarUrl!,
                               fit: BoxFit.cover,
@@ -104,7 +161,7 @@ class _DetailPageState extends State<DetailPage> {
             ),
           ),
 
-          // ======== KONTEN SCROLLABLE ========
+          // ======== SCROLLABLE CONTENT ========
           NotificationListener<ScrollNotification>(
             onNotification: (notification) {
               if (notification.metrics.pixels > 20 && !isScrolled) {
@@ -120,8 +177,7 @@ class _DetailPageState extends State<DetailPage> {
               child: Column(
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height * 0.45),
-
-                  // ======== KONTEN UTAMA ========
+                  // ======== MAIN CONTENT ========
                   Container(
                     transform: Matrix4.translationValues(0, -35, 0),
                     width: double.infinity,
@@ -157,7 +213,8 @@ class _DetailPageState extends State<DetailPage> {
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          widget.product.deskripsi ?? 'Produk berkualitas tinggi dengan cita rasa yang lezat. Cocok untuk dinikmati kapan saja.',
+                          widget.product.deskripsi ??
+                              'Produk berkualitas tinggi dengan cita rasa yang lezat. Cocok untuk dinikmati kapan saja.',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 17,
@@ -166,8 +223,7 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         const SizedBox(height: 28),
-
-                        // ======== PILIHAN UKURAN ========
+                        // ======== SIZE SELECTION ========
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: ['SM', 'MD', 'LG', 'XL'].map((size) {
@@ -176,9 +232,8 @@ class _DetailPageState extends State<DetailPage> {
                               onTap: () => setState(() => selectedSize = size),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 4),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 25,
                                   vertical: 25,
@@ -208,10 +263,8 @@ class _DetailPageState extends State<DetailPage> {
                             );
                           }).toList(),
                         ),
-
                         const SizedBox(height: 35),
-
-                        // ======== HARGA & JUMLAH ========
+                        // ======== PRICE & QUANTITY ========
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -220,7 +273,7 @@ class _DetailPageState extends State<DetailPage> {
                                 const Icon(CupertinoIcons.tag, size: 22),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Rp ${widget.product.harga.toStringAsFixed(0)}',
+                                  '\$${widget.product.harga.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.bold,
@@ -269,7 +322,6 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 20),
                         const Text(
                           '*) Dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore',
@@ -281,18 +333,14 @@ class _DetailPageState extends State<DetailPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 35),
-
-                        // ======== TOMBOL PLACE ORDER ========
+                        // ======== PLACE ORDER BUTTON ========
                         GestureDetector(
                           onTap: () {
-                            // Add product to cart
                             CartService().addToCart(
                               widget.product,
                               quantity,
                               selectedSize,
                             );
-
-                            // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -304,8 +352,6 @@ class _DetailPageState extends State<DetailPage> {
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
-
-                            // Navigate to cart page
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -318,9 +364,10 @@ class _DetailPageState extends State<DetailPage> {
                             duration: const Duration(milliseconds: 100),
                             child: Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 18),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF3A2D46), // Ungu tua
+                                color: const Color(0xFF3A2D46),
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
@@ -342,16 +389,14 @@ class _DetailPageState extends State<DetailPage> {
                                       const TextSpan(
                                         text: 'PLACE ORDER  ',
                                         style: TextStyle(
-                                          color: Colors.white, // teks putih
+                                          color: Colors.white,
                                         ),
                                       ),
                                       TextSpan(
                                         text:
-                                            'Rp ${totalPrice.toStringAsFixed(0)}',
+                                            '\$${totalPrice.toStringAsFixed(2)}',
                                         style: const TextStyle(
-                                          color: Color(
-                                            0xFFD3C1E5,
-                                          ), // ungu muda lembut
+                                          color: Color(0xFFD3C1E5),
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -410,9 +455,14 @@ class _DetailPageState extends State<DetailPage> {
                     fontSize: 18,
                   ),
                 ),
-                Icon(
-                  Icons.bookmark_border,
-                  color: isScrolled ? Colors.black : Colors.white,
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite
+                        ? Colors.red
+                        : (isScrolled ? Colors.red : Colors.white),
+                  ),
+                  onPressed: _toggleWishlist,
                 ),
               ],
             ),

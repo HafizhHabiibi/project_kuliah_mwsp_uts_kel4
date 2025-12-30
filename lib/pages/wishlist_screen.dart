@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
+import '../models/product_model.dart';
+import '../services/wishlist_service.dart';
+import '../components/sidebar.dart';
+import '../pages/detail_page.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -11,50 +14,46 @@ class WishlistScreen extends StatefulWidget {
 class _WishlistScreenState extends State<WishlistScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
-  List<Map<String, String>> filteredItems = [];
-
-  final List<Map<String, String>> wishlistItems = [
-    {
-      "image": "assets/images/menus/pic1.jpg",
-      "name": "Brown Hand Watch",
-      "variant": "Variant : White Stripes",
-      "price": "\$69.4",
-    },
-    {
-      "image": "assets/images/menus/pic2.jpg",
-      "name": "Possil Leather Watch",
-      "variant": "Variant : White Stripes",
-      "price": "\$69.4",
-    },
-    {
-      "image": "assets/images/menus/pic3.jpg",
-      "name": "Super Red Naiki Shoes",
-      "variant": "Variant : White Stripes",
-      "price": "\$69.4",
-    },
-    {
-      "image": "assets/images/menus/pic4.jpg",
-      "name": "Brown Hand Watch",
-      "variant": "Variant : White Stripes",
-      "price": "\$69.4",
-    },
-  ];
+  bool _isLoading = true;
+  List<ProductModel> _wishlist = [];
+  List<ProductModel> _filteredItems = [];
 
   @override
   void initState() {
     super.initState();
-    filteredItems = List.from(wishlistItems);
+    _loadWishlist();
     _searchController.addListener(_filterSearch);
+  }
+
+  Future<void> _loadWishlist() async {
+    setState(() => _isLoading = true);
+    try {
+      final data = await WishlistService().fetchWishlist();
+      setState(() {
+        _wishlist = data;
+        _filteredItems = data;
+      });
+    } catch (e) {
+      print('Failed to load wishlist: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal memuat wishlist'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _filterSearch() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      filteredItems = wishlistItems
+      _filteredItems = _wishlist
           .where(
             (item) =>
-                item["name"]!.toLowerCase().contains(query) ||
-                item["variant"]!.toLowerCase().contains(query),
+                item.nama.toLowerCase().contains(query) ||
+                (item.deskripsi ?? '').toLowerCase().contains(query),
           )
           .toList();
     });
@@ -65,8 +64,34 @@ class _WishlistScreenState extends State<WishlistScreen> {
     FocusScope.of(context).unfocus();
     setState(() {
       _isSearching = false;
-      filteredItems = List.from(wishlistItems);
+      _filteredItems = _wishlist;
     });
+  }
+
+  Future<void> _removeFromWishlist(ProductModel product) async {
+    try {
+      final success = await WishlistService().removeFromWishlist(
+        product.idProduk,
+      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produk dihapus dari wishlist'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        _loadWishlist();
+      } else {
+        throw Exception('Gagal menghapus');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal menghapus wishlist'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -77,7 +102,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Overlay hanya tampil saat sedang fokus mencari dan field masih kosong
     final bool showOverlay = _isSearching && _searchController.text.isEmpty;
 
     return Scaffold(
@@ -99,81 +123,88 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ),
         centerTitle: true,
         actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.more_vert, color: Colors.black87),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.more_vert, color: Colors.black87),
+                onPressed: () => Scaffold.of(context).openDrawer(),
               ),
             ),
-          ],
+          ),
+        ],
       ),
       drawer: const SideBar(),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Stack(
+          child: Column(
             children: [
-              /// ======= Konten utama =======
-              Column(
-                children: [
-                  /// 🔍 Search Bar
-                  WishlistSearchBar(
-                    controller: _searchController,
-                    isSearching: _isSearching,
-                    onFocusChange: (focus) =>
-                        setState(() => _isSearching = focus),
-                    onClear: _clearSearch,
-                  ),
-                  const SizedBox(height: 20),
+              /// 🔍 Search Bar
+              WishlistSearchBar(
+                controller: _searchController,
+                isSearching: _isSearching,
+                onFocusChange: (focus) => setState(() => _isSearching = focus),
+                onClear: _clearSearch,
+              ),
+              const SizedBox(height: 20),
 
-                  /// 🧾 Daftar konten (overlay hanya di area ini)
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        // List atau pesan kosong
-                        filteredItems.isEmpty
-                            ? const Center(
-                                child: Text(
-                                  "No items found",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
+              /// 🧾 Wishlist List
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Stack(
+                        children: [
+                          _filteredItems.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    "Wishlist masih kosong",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 16,
+                                    ),
                                   ),
+                                )
+                              : ListView.builder(
+                                  itemCount: _filteredItems.length,
+                                  itemBuilder: (context, index) {
+                                    final product = _filteredItems[index];
+                                    return WishlistItemCard(
+                                      product: product,
+                                      onRemove: () =>
+                                          _removeFromWishlist(product),
+                                      onTap: () async {
+                                        // Navigasi ke DetailPage dan reload wishlist saat kembali
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                DetailPage(product: product),
+                                          ),
+                                        );
+                                        _loadWishlist();
+                                      },
+                                    );
+                                  },
                                 ),
-                              )
-                            : ListView.builder(
-                                itemCount: filteredItems.length,
-                                itemBuilder: (context, index) {
-                                  final item = filteredItems[index];
-                                  return WishlistItemCard(item: item);
-                                },
-                              ),
 
-                        // Overlay transparan yang hanya menutupi area daftar
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 300),
-                          opacity: showOverlay ? 0.5 : 0.0,
-                          child: IgnorePointer(
-                            // Mengabaikan input hanya saat overlay TAMPIL (showOverlay == true)
-                            ignoring: !showOverlay,
-                            child: GestureDetector(
-                              onTap: _clearSearch,
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                color: Colors.black.withOpacity(0.2),
+                          /// Overlay saat search fokus
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 300),
+                            opacity: showOverlay ? 0.5 : 0.0,
+                            child: IgnorePointer(
+                              ignoring: !showOverlay,
+                              child: GestureDetector(
+                                onTap: _clearSearch,
+                                child: Container(
+                                  color: Colors.black.withOpacity(0.2),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                        ],
+                      ),
               ),
             ],
           ),
@@ -184,7 +215,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 }
 
 //
-// 🔹 WIDGET: Search Bar
+// 🔍 SEARCH BAR
 //
 class WishlistSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -249,12 +280,19 @@ class WishlistSearchBar extends StatelessWidget {
 }
 
 //
-// 🔹 WIDGET: Item Card
+// ❤️ WISHLIST ITEM CARD
 //
 class WishlistItemCard extends StatelessWidget {
-  final Map<String, String> item;
+  final ProductModel product;
+  final VoidCallback onRemove;
+  final VoidCallback? onTap;
 
-  const WishlistItemCard({super.key, required this.item});
+  const WishlistItemCard({
+    super.key,
+    required this.product,
+    required this.onRemove,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -275,15 +313,19 @@ class WishlistItemCard extends StatelessWidget {
         contentPadding: const EdgeInsets.all(10),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: Image.asset(
-            item["image"]!,
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-          ),
+          child: product.gambarUrl != null && product.gambarUrl!.isNotEmpty
+              ? Image.network(
+                  product.gambarUrl!,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.image, size: 40),
+                )
+              : const Icon(Icons.coffee, size: 40),
         ),
         title: Text(
-          item["name"]!,
+          product.nama,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 15,
@@ -294,12 +336,12 @@ class WishlistItemCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              item["variant"]!,
+              product.kategori,
               style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 5),
             Text(
-              item["price"]!,
+              '\$ ${product.harga}',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -307,7 +349,14 @@ class WishlistItemCard extends StatelessWidget {
             ),
           ],
         ),
-        trailing: const Icon(Icons.favorite, color: Color(0xFF4A3749)),
+        trailing: IconButton(
+          icon: const Icon(
+            Icons.favorite,
+            color: Color.fromARGB(255, 252, 0, 0),
+          ),
+          onPressed: onRemove,
+        ),
+        onTap: onTap,
       ),
     );
   }
