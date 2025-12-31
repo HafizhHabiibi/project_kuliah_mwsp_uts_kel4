@@ -26,24 +26,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // ================= LOAD USER =================
   Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final result = await AuthService().getUserInfo();
-
       if (result['success'] == true && result['user'] != null) {
-        setState(() {
-          _currentUser = result['user'] as UserModel;
-          _isLoading = false;
-        });
-      } else {
-        _isLoading = false;
+        _currentUser = result['user'] as UserModel;
       }
-    } catch (e) {
-      _isLoading = false;
-    }
+    } catch (_) {}
+
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -72,6 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       drawer: const SideBar(),
       drawerEnableOpenDragGesture: false,
+
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : Column(
@@ -79,150 +72,36 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 20),
 
                 // ===== AVATAR & USER INFO =====
-                Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 130,
-                          height: 130,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color.fromRGBO(226, 201, 150, 1),
-                              width: 4,
-                            ),
-                          ),
-                        ),
-                        CircleAvatar(
-                          radius: 55,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage: _currentUser?.gambarUrl != null
-                              ? NetworkImage(_currentUser!.gambarUrl!)
-                              : null,
-                          child: _currentUser?.gambarUrl == null
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.grey,
-                                )
-                              : null,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _currentUser?.username ?? "-",
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _currentUser?.alamat ?? "Alamat Kosong",
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                  ],
-                ),
+                _buildUserInfo(),
 
                 const SizedBox(height: 24),
 
                 // ===== ACTION ICONS =====
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _circleAction(
-                      icon: Icons.phone,
-                      onTap: () {
-                        setState(() {
-                          showCallSection = !showCallSection;
-                        });
-                      },
-                    ),
-                    _circleAction(
-                      icon: Icons.location_on,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const StoreLocationsPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _circleAction(
-                      icon: Icons.email,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MessagesPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _circleAction(
-                      icon: Icons.edit,
-                      onTap: () async {
-                        final updatedUser = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                EditProfilePage(currentUser: _currentUser),
-                          ),
-                        );
+                _buildActionIcons(),
 
-                        if (updatedUser is UserModel) {
-                          setState(() {
-                            _currentUser = updatedUser;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 20),
 
-                const SizedBox(height: 30),
-
-                // ===== WHITE SECTION =====
+                // ===== BOTTOM SECTION (SWITCHABLE) =====
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(28),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ===== FAVOURITE MENUS =====
-                        const Text(
-                          "Favourite Menus",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _favouriteItem(
-                          title: "Brewed Cappuccino Latte with Creamy Milk",
-                          price: "\$5.8",
-                          rating: "4.0",
-                          image: "assets/images/cart/pic1.jpg",
-                        ),
-                        _favouriteItem(
-                          title: "Melted Omelette with Spicy Chilli",
-                          price: "\$8.2",
-                          rating: "4.0",
-                          image: "assets/images/cart/pic2.jpg",
-                        ),
-                      ],
-                    ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 280),
+                    transitionBuilder: (child, animation) {
+                      final curved = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      );
+
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.12),
+                          end: Offset.zero,
+                        ).animate(curved),
+                        child: FadeTransition(opacity: curved, child: child),
+                      );
+                    },
+                    child: showCallSection
+                        ? _buildCallSection()
+                        : _buildFavouriteSection(),
                   ),
                 ),
               ],
@@ -230,8 +109,164 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // ================= REUSABLE WIDGET =================
-  Widget _circleAction({required IconData icon, required VoidCallback onTap}) {
+  // ================= USER INFO =================
+  Widget _buildUserInfo() {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color.fromRGBO(226, 201, 150, 1),
+                  width: 4,
+                ),
+              ),
+            ),
+            CircleAvatar(
+              radius: 55,
+              backgroundColor: Colors.grey[300],
+              backgroundImage: _currentUser?.gambarUrl != null
+                  ? NetworkImage(_currentUser!.gambarUrl!)
+                  : null,
+              child: _currentUser?.gambarUrl == null
+                  ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                  : null,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _currentUser?.username ?? "-",
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _currentUser?.alamat ?? "Alamat Kosong",
+          style: const TextStyle(color: Colors.white70),
+        ),
+      ],
+    );
+  }
+
+  // ================= ACTION ICONS =================
+  Widget _buildActionIcons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _circleAction(
+          icon: Icons.phone,
+          isActive: showCallSection,
+          onTap: () {
+            setState(() => showCallSection = !showCallSection);
+          },
+        ),
+        _circleAction(
+          icon: Icons.location_on,
+          onTap: () {
+            setState(() => showCallSection = false);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const StoreLocationsPage()),
+            );
+          },
+        ),
+        _circleAction(
+          icon: Icons.email,
+          onTap: () {
+            setState(() => showCallSection = false);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MessagesPage()),
+            );
+          },
+        ),
+        _circleAction(
+          icon: Icons.edit,
+          onTap: () async {
+            setState(() => showCallSection = false);
+            final updatedUser = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditProfilePage(currentUser: _currentUser),
+              ),
+            );
+            if (updatedUser is UserModel) {
+              setState(() => _currentUser = updatedUser);
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  // ================= CALL SECTION =================
+  Widget _buildCallSection() {
+    return Container(
+      key: const ValueKey("call"),
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        children: const [
+          _PhoneCard(number: "123 456 7890"),
+          SizedBox(height: 12),
+          _PhoneCard(number: "987 654 3210"),
+        ],
+      ),
+    );
+  }
+
+  // ================= FAVOURITE SECTION =================
+  Widget _buildFavouriteSection() {
+    return Container(
+      key: const ValueKey("fav"),
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Favourite Menus",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 16),
+          _favouriteItem(
+            title: "Brewed Cappuccino Latte with Creamy Milk",
+            price: "\$5.8",
+            rating: "4.0",
+            image: "assets/images/cart/pic1.jpg",
+          ),
+          _favouriteItem(
+            title: "Melted Omelette with Spicy Chilli",
+            price: "\$8.2",
+            rating: "4.0",
+            image: "assets/images/cart/pic2.jpg",
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= REUSABLE =================
+  Widget _circleAction({
+    required IconData icon,
+    bool isActive = false,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: InkWell(
@@ -239,14 +274,14 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.circular(40),
         child: CircleAvatar(
           radius: 22,
-          backgroundColor: Colors.white,
-          child: Icon(icon, color: Colors.black),
+          backgroundColor: isActive ? Colors.black : Colors.white,
+          child: Icon(icon, color: isActive ? Colors.white : Colors.black),
         ),
       ),
     );
   }
 
-  Widget _favouriteItem({
+  static Widget _favouriteItem({
     required String title,
     required String price,
     required String rating,
@@ -257,9 +292,7 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
-        ],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
       ),
       child: Row(
         children: [
@@ -282,6 +315,38 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text("$price   ⭐ $rating"),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ================= PHONE CARD =================
+class _PhoneCard extends StatelessWidget {
+  final String number;
+  const _PhoneCard({required this.number});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 22,
+            backgroundColor: Color.fromRGBO(74, 55, 73, 1),
+            child: Icon(Icons.call, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
+          Text(
+            number,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),
