@@ -61,7 +61,7 @@ class _ProductPageState extends State<ProductPage>
       if (productsResult['success'] == true) {
         final List<ProductModel> products = productsResult['products'] ?? [];
         print('✅ [ProductPage] Loaded ${products.length} products');
-        
+
         // Extract unique categories from products
         final Set<String> uniqueCategories = {};
         for (var product in products) {
@@ -69,21 +69,26 @@ class _ProductPageState extends State<ProductPage>
         }
         final List<String> extractedCategories = uniqueCategories.toList();
         extractedCategories.sort(); // Sort alphabetically
-        
+
         print('✅ [ProductPage] Extracted categories: $extractedCategories');
 
         setState(() {
           allProducts = products;
           filteredProducts = List.from(allProducts);
           categories = extractedCategories;
-          
+
           // Initialize TabController after we have categories
-          _tabController = TabController(length: categories.length, vsync: this);
+          _tabController = TabController(
+            length: categories.length,
+            vsync: this,
+          );
           _tabController?.addListener(_onTabChanged);
-          
+
           isLoading = false;
         });
-        print('✅ [ProductPage] TabController initialized with ${categories.length} tabs');
+        print(
+          '✅ [ProductPage] TabController initialized with ${categories.length} tabs',
+        );
       } else {
         setState(() {
           errorMessage = productsResult['message'] ?? 'Failed to load products';
@@ -108,7 +113,7 @@ class _ProductPageState extends State<ProductPage>
 
   void _filterByCategory(int index) {
     if (index < 0 || index >= categories.length) return;
-    
+
     final selectedCategory = categories[index];
     setState(() {
       filteredProducts = allProducts
@@ -270,230 +275,270 @@ class _ProductPageState extends State<ProductPage>
                       ),
                     )
                   : errorMessage != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                size: 60,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                errorMessage!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: _loadData,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF4A3749),
-                                ),
-                                child: const Text('Retry'),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 60,
+                            color: Colors.red,
                           ),
-                        )
-                      : _tabController == null
-                          ? const Center(
-                              child: Text(
-                                'Loading...',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            )
-                          : TabBarView(
-                          controller: _tabController!,
-                          children: categories.map((category) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: filteredProducts.isEmpty
-                                  ? const Center(
-                                      child: Text(
-                                        'No products found',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black54,
-                                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _loadData,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4A3749),
+                            ),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _tabController == null
+                  ? const Center(
+                      child: Text(
+                        'Loading...',
+                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                      ),
+                    )
+                  : TabBarView(
+                      controller: _tabController!,
+                      children: categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: filteredProducts.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    'No products found',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                )
+                              : GridView.builder(
+                                  itemCount: filteredProducts.length,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        childAspectRatio: 0.85,
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
                                       ),
-                                    )
-                                  : GridView.builder(
-                                      itemCount: filteredProducts.length,
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,
-                                            childAspectRatio: 0.85,
-                                            crossAxisSpacing: 16,
-                                            mainAxisSpacing: 16,
-                                          ),
-                                      itemBuilder: (context, index) {
-                                        final product = filteredProducts[index];
+                                  itemBuilder: (context, index) {
+                                    final product = filteredProducts[index];
 
-                                        // ==== CARD PRODUK YANG BISA DIKLIK ====
-                                        return InkWell(
-                                          borderRadius: BorderRadius.circular(18),
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => DetailPage(product: product),
+                                    // ==== CARD PRODUK YANG BISA DIKLIK ====
+                                    return InkWell(
+                                      borderRadius: BorderRadius.circular(18),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                DetailPage(product: product),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                0.08,
                                               ),
-                                            );
-                                          },
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(18),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withOpacity(0.08),
-                                                  blurRadius: 6,
-                                                  offset: const Offset(0, 3),
-                                                ),
-                                              ],
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 3),
                                             ),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                          ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // ===== GAMBAR PRODUK =====
+                                            Stack(
                                               children: [
-                                                // ===== GAMBAR PRODUK =====
-                                                Stack(
-                                                  children: [
-                                                    ClipRRect(
-                                                      borderRadius: const BorderRadius.vertical(
-                                                        top: Radius.circular(18),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      const BorderRadius.vertical(
+                                                        top: Radius.circular(
+                                                          18,
+                                                        ),
                                                       ),
-                                                      child: product.gambarUrl != null && product.gambarUrl!.isNotEmpty
-                                                          ? Image.network(
-                                                              product.gambarUrl!,
-                                                              height: 120,
-                                                              width: double.infinity,
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder: (context, error, stackTrace) {
+                                                  child:
+                                                      product.gambarUrl !=
+                                                              null &&
+                                                          product
+                                                              .gambarUrl!
+                                                              .isNotEmpty
+                                                      ? Image.network(
+                                                          product.gambarUrl!,
+                                                          height: 120,
+                                                          width:
+                                                              double.infinity,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder:
+                                                              (
+                                                                context,
+                                                                error,
+                                                                stackTrace,
+                                                              ) {
                                                                 return Container(
                                                                   height: 120,
-                                                                  color: Colors.grey[300],
+                                                                  color: Colors
+                                                                      .grey[300],
                                                                   child: const Icon(
-                                                                    Icons.image_not_supported,
+                                                                    Icons
+                                                                        .image_not_supported,
                                                                     size: 50,
-                                                                    color: Colors.grey,
+                                                                    color: Colors
+                                                                        .grey,
                                                                   ),
                                                                 );
                                                               },
-                                                            )
-                                                          : Container(
-                                                              height: 120,
-                                                              color: Colors.grey[300],
-                                                              child: const Icon(
-                                                                Icons.coffee,
-                                                                size: 50,
-                                                                color: Colors.grey,
-                                                              ),
-                                                            ),
-                                                    ),
-                                                    // ===== IKON KERANJANG =====
-                                                    Positioned(
-                                                      bottom: 8,
-                                                      right: 8,
-                                                      child: InkWell(
-                                                        borderRadius: BorderRadius.circular(50),
-                                                        onTap: () {
-                                                          Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  const CartPage(),
-                                                            ),
-                                                          );
-                                                        },
-                                                        child: Container(
-                                                          width: 38,
-                                                          height: 38,
-                                                          decoration: BoxDecoration(
-                                                            color: Colors.white,
-                                                            shape: BoxShape.circle,
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors.black.withOpacity(
+                                                        )
+                                                      : Container(
+                                                          height: 120,
+                                                          color:
+                                                              Colors.grey[300],
+                                                          child: const Icon(
+                                                            Icons.coffee,
+                                                            size: 50,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                ),
+                                                // ===== IKON KERANJANG =====
+                                                Positioned(
+                                                  bottom: 8,
+                                                  right: 8,
+                                                  child: InkWell(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          50,
+                                                        ),
+                                                    onTap: () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const CartPage(),
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: Container(
+                                                      width: 38,
+                                                      height: 38,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        shape: BoxShape.circle,
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: Colors.black
+                                                                .withOpacity(
                                                                   0.15,
                                                                 ),
-                                                                blurRadius: 6,
-                                                                offset: const Offset(0, 3),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          child: const Icon(
-                                                            Icons.shopping_bag_outlined,
-                                                            color: Color(0xFF4A3749),
-                                                            size: 20,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                // ===== DESKRIPSI PRODUK =====
-                                                Padding(
-                                                  padding: const EdgeInsets.all(10),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        product.nama,
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w600,
-                                                          color: Colors.black87,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 3),
-                                                      Text(
-                                                        product.kategori,
-                                                        style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 6),
-                                                      Row(
-                                                        children: [
-                                                          const Icon(
-                                                            Icons.local_offer_outlined,
-                                                            color: Colors.black54,
-                                                            size: 16,
-                                                          ),
-                                                          const SizedBox(width: 4),
-                                                          Text(
-                                                            _currencyFmt.format(product.harga),
-                                                            style: const TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight: FontWeight.bold,
-                                                              color: Color(0xFF4A3749),
-                                                            ),
+                                                            blurRadius: 6,
+                                                            offset:
+                                                                const Offset(
+                                                                  0,
+                                                                  3,
+                                                                ),
                                                           ),
                                                         ],
                                                       ),
-                                                    ],
+                                                      child: const Icon(
+                                                        Icons
+                                                            .shopping_bag_outlined,
+                                                        color: Color(
+                                                          0xFF4A3749,
+                                                        ),
+                                                        size: 20,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                            );
-                          }).toList(),
-                        ),
+                                            // ===== DESKRIPSI PRODUK =====
+                                            Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    product.nama,
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 3),
+                                                  Text(
+                                                    product.kategori,
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons
+                                                            .local_offer_outlined,
+                                                        color: Colors.black54,
+                                                        size: 16,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        _currencyFmt.format(
+                                                          product.harga,
+                                                        ),
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Color(
+                                                            0xFF4A3749,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                        );
+                      }).toList(),
+                    ),
             ),
           ],
         ),
