@@ -46,7 +46,7 @@ class _MainPageState extends State<MainPage> {
     _loadFeaturedProducts();
   }
 
-  // Greeting Dinamis
+  // ✅ FUNGSI UNTUK GREETING DINAMIS
   String _getGreeting() {
     final hour = DateTime.now().hour;
 
@@ -61,7 +61,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  // Reload Data
+  // ✅ TAMBAHAN: Reload data ketika halaman muncul kembali
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -172,7 +172,7 @@ class _MainPageState extends State<MainPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _getGreeting(),
+                              _getGreeting(), // ✅ GREETING DINAMIS
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black54,
@@ -568,10 +568,14 @@ class _MainPageState extends State<MainPage> {
     return InkWell(
       borderRadius: BorderRadius.circular(22),
       onTap: () {
+        // Navigasi ke ProductPage dengan kategori yang dipilih
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductPage(categoryName: title),
+            builder: (context) => ProductPage(
+              categoryName: title,
+              initialCategory: title, // ✅ Kirim kategori yang dipilih
+            ),
           ),
         );
       },
