@@ -5,11 +5,9 @@ import '../models/product_model.dart';
 import 'auth_service.dart';
 
 class WishlistService {
-  final AuthService _authService = AuthService();
-
   /// ================= GET WISHLIST =================
   Future<List<ProductModel>> fetchWishlist() async {
-    final token = await _authService.getToken();
+    final token = await AuthService.getToken();
 
     if (token == null) {
       throw Exception('User not authenticated');
@@ -17,10 +15,7 @@ class WishlistService {
 
     final response = await http.get(
       Uri.parse(AppConfig.wishlist),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
     print('FETCH WISHLIST: Status ${response.statusCode}');
@@ -39,19 +34,17 @@ class WishlistService {
 
   /// ================= ADD TO WISHLIST =================
   Future<bool> addToWishlist(int productId) async {
-    final token = await _authService.getToken();
+    final token = await AuthService.getToken();
 
     if (token == null) return false;
 
-    final body = {'produk_id': productId.toString()}; // ✅ key harus 'produk_id'
+    final body = {'produk_id': productId.toString()};
+
     print('ADD WISHLIST: Body: $body');
 
     final response = await http.post(
       Uri.parse(AppConfig.wishlist),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
       body: body,
     );
 
@@ -63,7 +56,7 @@ class WishlistService {
 
   /// ================= REMOVE WISHLIST =================
   Future<bool> removeFromWishlist(int productId) async {
-    final token = await _authService.getToken();
+    final token = await AuthService.getToken();
 
     if (token == null) return false;
 
@@ -72,10 +65,7 @@ class WishlistService {
 
     final response = await http.delete(
       Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
     print('REMOVE WISHLIST: Status ${response.statusCode}');
