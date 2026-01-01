@@ -9,8 +9,13 @@ import 'package:project_kuliah_mwsp_uts_kel4/models/product_model.dart';
 
 class ProductPage extends StatefulWidget {
   final String categoryName;
+  final String? initialCategory; // ✅ Parameter baru untuk kategori awal
 
-  const ProductPage({super.key, required this.categoryName});
+  const ProductPage({
+    super.key,
+    required this.categoryName,
+    this.initialCategory, // ✅ Optional parameter
+  });
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -68,7 +73,7 @@ class _ProductPageState extends State<ProductPage>
           uniqueCategories.add(product.kategori);
         }
         final List<String> extractedCategories = uniqueCategories.toList();
-        extractedCategories.sort(); // Sort alphabetically
+        // extractedCategories.sort(); // Sort alphabetically
 
         print('✅ [ProductPage] Extracted categories: $extractedCategories');
 
@@ -77,12 +82,28 @@ class _ProductPageState extends State<ProductPage>
           filteredProducts = List.from(allProducts);
           categories = extractedCategories;
 
-          // Initialize TabController after we have categories
+          // ✅ Cari index kategori yang dipilih
+          int initialIndex = 0;
+          if (widget.initialCategory != null) {
+            final index = categories.indexOf(widget.initialCategory!);
+            if (index != -1) {
+              initialIndex = index;
+              print(
+                '✅ [ProductPage] Opening at category: ${widget.initialCategory} (index: $initialIndex)',
+              );
+            }
+          }
+
+          // Initialize TabController dengan index kategori yang dipilih
           _tabController = TabController(
             length: categories.length,
             vsync: this,
+            initialIndex: initialIndex, // ✅ Set tab awal
           );
           _tabController?.addListener(_onTabChanged);
+
+          // Filter produk sesuai kategori awal
+          _filterByCategory(initialIndex);
 
           isLoading = false;
         });
@@ -120,13 +141,22 @@ class _ProductPageState extends State<ProductPage>
           .where((product) => product.kategori == selectedCategory)
           .toList();
     });
+    print(
+      '🔄 [ProductPage] Filtered to category: $selectedCategory (${filteredProducts.length} products)',
+    );
   }
 
   void _searchProduct(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredProducts = List.from(allProducts);
+        // Jika search kosong, filter berdasarkan tab yang aktif
+        if (_tabController != null) {
+          _filterByCategory(_tabController!.index);
+        } else {
+          filteredProducts = List.from(allProducts);
+        }
       } else {
+        // Jika search ada, cari dari semua produk
         filteredProducts = allProducts
             .where(
               (item) => item.nama.toLowerCase().contains(query.toLowerCase()),
