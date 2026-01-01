@@ -36,6 +36,9 @@ class _MainPageState extends State<MainPage> {
   String? _featuredError;
   List<ProductModel> _featuredProducts = const [];
 
+  // Flag untuk tracking apakah sudah pernah load
+  bool _hasLoadedOnce = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,8 +46,30 @@ class _MainPageState extends State<MainPage> {
     _loadFeaturedProducts();
   }
 
+  // ✅ TAMBAHAN: Reload data ketika halaman muncul kembali
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Cek apakah halaman ini sedang aktif/visible
+    final route = ModalRoute.of(context);
+    if (route != null && route.isCurrent && _hasLoadedOnce) {
+      // Reload user data untuk mendapatkan data terbaru
+      _loadUserData();
+      print('🔄 MainPage terdeteksi aktif kembali - refresh user data');
+    }
+  }
+
   // Load user data from AuthService
   Future<void> _loadUserData() async {
+    // Jangan set loading true jika ini bukan load pertama kali
+    // agar UI tidak berkedip
+    if (!_hasLoadedOnce) {
+      setState(() {
+        _isLoadingUser = true;
+      });
+    }
+
     try {
       final result = await AuthService().getUserInfo();
 
@@ -52,6 +77,7 @@ class _MainPageState extends State<MainPage> {
         setState(() {
           _currentUser = result['user'] as UserModel;
           _isLoadingUser = false;
+          _hasLoadedOnce = true;
         });
 
         // Initialize cart service with user ID
@@ -65,6 +91,7 @@ class _MainPageState extends State<MainPage> {
       } else {
         setState(() {
           _isLoadingUser = false;
+          _hasLoadedOnce = true;
         });
         print('⚠️ No user session found');
         CartService().setCurrentUser(null);
@@ -72,6 +99,7 @@ class _MainPageState extends State<MainPage> {
     } catch (e) {
       setState(() {
         _isLoadingUser = false;
+        _hasLoadedOnce = true;
       });
       print('❌ Error loading user data: $e');
     }
@@ -100,8 +128,8 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Show loading indicator while user data is loading
-    if (_isLoadingUser) {
+    // Show loading indicator while user data is loading (only first time)
+    if (_isLoadingUser && !_hasLoadedOnce) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
