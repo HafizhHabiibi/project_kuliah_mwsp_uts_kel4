@@ -46,7 +46,22 @@ class _MainPageState extends State<MainPage> {
     _loadFeaturedProducts();
   }
 
-  // ✅ TAMBAHAN: Reload data ketika halaman muncul kembali
+  // Greeting Dinamis
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 11) {
+      return "Good Morning";
+    } else if (hour >= 11 && hour < 15) {
+      return "Good Afternoon";
+    } else if (hour >= 15 && hour < 18) {
+      return "Good Evening";
+    } else {
+      return "Good Night";
+    }
+  }
+
+  // Reload Data
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -156,9 +171,9 @@ class _MainPageState extends State<MainPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Good Morning",
-                              style: TextStyle(
+                            Text(
+                              _getGreeting(),
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black54,
                               ),
