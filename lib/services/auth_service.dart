@@ -6,7 +6,6 @@ class AuthService {
   final ApiService _apiService = ApiService();
 
   // ================= REGISTER =================
-  // Register lalu AUTO LOGIN
   Future<Map<String, dynamic>> register({
     required String username,
     required String email,
@@ -22,7 +21,6 @@ class AuthService {
       final data = _apiService.parseResponse(response);
 
       if (response.statusCode == 201 && data['status'] == 'success') {
-        // setelah register → langsung login
         return await login(email: email, password: password);
       }
 
@@ -50,7 +48,6 @@ class AuthService {
       final data = _apiService.parseResponse(response);
 
       if (response.statusCode == 200 && data['status'] == 'success') {
-        // simpan token
         final token = data['token'];
         await _apiService.saveToken(token);
 
@@ -76,9 +73,7 @@ class AuthService {
       final data = _apiService.parseResponse(response);
 
       if (response.statusCode == 200 && data['status'] == 'success') {
-        // backend mengirim user login di key "data"
         final user = UserModel.fromJson(data['data']);
-
         return {'success': true, 'user': user};
       }
 
@@ -135,7 +130,6 @@ class AuthService {
     try {
       await _apiService.post(AppConfig.logout, body: {}, needsAuth: true);
     } finally {
-      // apapun hasilnya → hapus token
       await _apiService.removeToken();
     }
   }
@@ -146,8 +140,9 @@ class AuthService {
     return token != null && token.isNotEmpty;
   }
 
-  // ================= GET TOKEN =================
-  Future<String?> getToken() async {
-    return await _apiService.getToken();
+  // ================= ✅ STATIC GET TOKEN =================
+  static Future<String?> getToken() async {
+    final apiService = ApiService();
+    return await apiService.getToken();
   }
 }
