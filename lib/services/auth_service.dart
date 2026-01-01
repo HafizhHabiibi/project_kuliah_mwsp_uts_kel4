@@ -140,7 +140,7 @@ class AuthService {
     return token != null && token.isNotEmpty;
   }
 
-  // ================= ✅ STATIC GET TOKEN =================
+  // ================= STATIC GET TOKEN =================
   static Future<String?> getToken() async {
     final apiService = ApiService();
     return await apiService.getToken();
