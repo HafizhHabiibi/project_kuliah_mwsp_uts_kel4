@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/components/bottom_bar.dart';
@@ -10,17 +9,11 @@ import 'package:project_kuliah_mwsp_uts_kel4/services/product_service.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/services/auth_service.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/services/cart_service.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/models/product_model.dart';
+import 'package:project_kuliah_mwsp_uts_kel4/models/user_model.dart';
 import 'package:intl/intl.dart';
 
 class MainPage extends StatefulWidget {
-  final String? profileImagePath;
-  final String userName;
-
-  const MainPage({
-    super.key,
-    this.profileImagePath,
-    this.userName = "Kevin Hard",
-  });
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -34,6 +27,11 @@ class _MainPageState extends State<MainPage> {
     symbol: '\$',
   );
 
+  // User data state
+  UserModel? _currentUser;
+  bool _isLoadingUser = true;
+
+  // Featured products state
   bool _featuredLoading = true;
   String? _featuredError;
   List<ProductModel> _featuredProducts = const [];
@@ -41,35 +39,41 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _initializeUserSession();
+    _loadUserData();
     _loadFeaturedProducts();
   }
 
-  // Initialize user session in CartService
-  Future<void> _initializeUserSession() async {
-    // Check if user is already set (from login)
-    if (CartService().currentUserId != null) {
-      print('✅ User session already initialized (ID: ${CartService().currentUserId})');
-      // Load cart from backend
-      await CartService().loadCartFromBackend();
-      return;
-    }
+  // Load user data from AuthService
+  Future<void> _loadUserData() async {
+    try {
+      final result = await AuthService().getUserInfo();
 
-    // Try to get user info from AuthService
-    final authService = AuthService();
-    final userInfo = await authService.getUserInfo();
-    
-    if (userInfo['success'] == true) {
-      final user = userInfo['user'];
-      // Set current user in CartService using user ID
-      CartService().setCurrentUser(user.id.toString());
-      print('✅ User session initialized from AuthService: ${user.username} (ID: ${user.id})');
-      
-      // Load cart from backend
-      await CartService().loadCartFromBackend();
-    } else {
-      print('⚠️ No user session found');
-      CartService().setCurrentUser(null);
+      if (result['success'] == true && result['user'] != null) {
+        setState(() {
+          _currentUser = result['user'] as UserModel;
+          _isLoadingUser = false;
+        });
+
+        // Initialize cart service with user ID
+        CartService().setCurrentUser(_currentUser!.id.toString());
+        print(
+          '✅ User session initialized: ${_currentUser!.username} (ID: ${_currentUser!.id})',
+        );
+
+        // Load cart from backend
+        await CartService().loadCartFromBackend();
+      } else {
+        setState(() {
+          _isLoadingUser = false;
+        });
+        print('⚠️ No user session found');
+        CartService().setCurrentUser(null);
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingUser = false;
+      });
+      print('❌ Error loading user data: $e');
     }
   }
 
@@ -96,6 +100,11 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Show loading indicator while user data is loading
+    if (_isLoadingUser) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -128,7 +137,7 @@ class _MainPageState extends State<MainPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.userName,
+                              _currentUser?.username ?? "Guest",
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -304,7 +313,7 @@ class _MainPageState extends State<MainPage> {
 
                   const SizedBox(height: 30),
 
-                  // ===== FEATURED BEVERAGES =====
+                  // ===== FEATURED PRODUCTS =====
                   const Text(
                     "Featured Products",
                     style: TextStyle(
@@ -381,15 +390,24 @@ class _MainPageState extends State<MainPage> {
 
   // ===== FOTO PROFIL =====
   Widget _buildProfileImage() {
-    if (widget.profileImagePath != null &&
-        widget.profileImagePath!.isNotEmpty) {
-      final file = File(widget.profileImagePath!);
-      if (file.existsSync()) {
-        return Image.file(file, height: 45, width: 45, fit: BoxFit.cover);
-      }
+    if (_currentUser?.gambarUrl != null &&
+        _currentUser!.gambarUrl!.isNotEmpty) {
+      return Image.network(
+        _currentUser!.gambarUrl!,
+        height: 45,
+        width: 45,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return _defaultAvatar();
+        },
+      );
     }
+    return _defaultAvatar();
+  }
+
+  Widget _defaultAvatar() {
     return Image.asset(
-      'assets/images/profile/avatar1.jpg',
+      'assets/images/default/default_img.jpg',
       height: 45,
       width: 45,
       fit: BoxFit.cover,
@@ -566,159 +584,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // ===== FEATURED CARD =====
-  Widget _buildFeaturedCard({
-    required String image,
-    required String category,
-    required String name,
-    required String price,
-    required double rating,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () {
-        // TODO: This hardcoded card needs product data to navigate to DetailPage
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => DetailPage(product: product)),
-        // );
-      },
-      child: Container(
-        width: 160,
-        margin: const EdgeInsets.only(right: 15),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  child: Image.asset(
-                    image,
-                    height: 100,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                rating.toStringAsFixed(1),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            price,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF4A3749),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // ===== TOMBOL KERANJANG =====
-            Positioned(
-              top: 80,
-              right: 10,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CartPage()),
-                    );
-                  },
-                  child: Container(
-                    width: 55,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.shopping_bag_outlined,
-                      color: Color(0xFF4A3749),
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ===== FEATURED CARD (from ProductModel) =====
   Widget _buildFeaturedProductCard(ProductModel product) {
     final priceStr = _currencyFmt.format(product.harga);
@@ -761,6 +626,14 @@ class _MainPageState extends State<MainPage> {
                           height: 100,
                           width: double.infinity,
                           fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) {
+                            return Image.asset(
+                              'assets/images/menus/slide/pic1.jpg',
+                              height: 100,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            );
+                          },
                         )
                       : Image.asset(
                           'assets/images/menus/slide/pic1.jpg',
