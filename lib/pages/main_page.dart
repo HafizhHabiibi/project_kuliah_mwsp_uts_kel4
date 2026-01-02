@@ -36,6 +36,11 @@ class _MainPageState extends State<MainPage> {
   String? _featuredError;
   List<ProductModel> _featuredProducts = const [];
 
+  // TAMBAHAN: State untuk promo products
+  bool _promoLoading = true;
+  String? _promoError;
+  List<ProductModel> _promoProducts = const [];
+
   // Flag untuk tracking apakah sudah pernah load
   bool _hasLoadedOnce = false;
 
@@ -44,9 +49,10 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     _loadUserData();
     _loadFeaturedProducts();
+    _loadPromoProducts();
   }
 
-  // ✅ FUNGSI UNTUK GREETING DINAMIS
+  // FUNGSI UNTUK GREETING DINAMIS
   String _getGreeting() {
     final hour = DateTime.now().hour;
 
@@ -61,7 +67,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  // ✅ TAMBAHAN: Reload data ketika halaman muncul kembali
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -141,6 +146,91 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  Future<void> _loadPromoProducts() async {
+    setState(() {
+      _promoLoading = true;
+      _promoError = null;
+    });
+
+    try {
+      // Ambil semua produk atau produk tertentu
+      final result = await _productService.getAllProducts();
+
+      if (mounted) {
+        setState(() {
+          if (result['success'] == true) {
+            _promoProducts = result['products'] as List<ProductModel>;
+            _promoLoading = false;
+
+            // DEBUG: Print semua produk untuk melihat nama yang tersedia
+            print('🔍 Total produk dimuat: ${_promoProducts.length}');
+            for (var product in _promoProducts) {
+              print('   - ${product.nama} (Kategori: ${product.kategori})');
+            }
+          } else {
+            _promoError = result['message']?.toString() ?? 'Gagal memuat promo';
+            _promoLoading = false;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _promoError = 'Error: $e';
+          _promoLoading = false;
+        });
+      }
+      print('❌ Error loading promo products: $e');
+    }
+  }
+
+  // FUNGSI HELPER: Cari produk berdasarkan NAMA LENGKAP atau keyword spesifik
+  ProductModel? _findProductByKeyword(String keyword) {
+    try {
+      // Strategi pencarian berlapis untuk akurasi lebih tinggi
+      ProductModel? foundProduct;
+
+      // 1. Coba cari dengan nama lengkap (case insensitive)
+      try {
+        foundProduct = _promoProducts.firstWhere(
+          (product) => product.nama.toLowerCase() == keyword.toLowerCase(),
+        );
+        print('✅ Produk ditemukan (exact match): ${foundProduct.nama}');
+        return foundProduct;
+      } catch (e) {
+        // Lanjut ke strategi berikutnya
+      }
+
+      // 2. Coba cari dengan keyword di awal nama
+      try {
+        foundProduct = _promoProducts.firstWhere(
+          (product) =>
+              product.nama.toLowerCase().startsWith(keyword.toLowerCase()),
+        );
+        print('✅ Produk ditemukan (starts with): ${foundProduct.nama}');
+        return foundProduct;
+      } catch (e) {
+        // Lanjut ke strategi berikutnya
+      }
+
+      // 3. Coba cari dengan contains (paling fleksibel tapi bisa salah)
+      try {
+        foundProduct = _promoProducts.firstWhere(
+          (product) =>
+              product.nama.toLowerCase().contains(keyword.toLowerCase()),
+        );
+        print('⚠️ Produk ditemukan (contains): ${foundProduct.nama}');
+        return foundProduct;
+      } catch (e) {
+        print('❌ Produk tidak ditemukan untuk keyword: "$keyword"');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error saat mencari produk: $e');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Show loading indicator while user data is loading (only first time)
@@ -172,7 +262,7 @@ class _MainPageState extends State<MainPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _getGreeting(), // ✅ GREETING DINAMIS
+                              _getGreeting(),
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black54,
@@ -228,7 +318,7 @@ class _MainPageState extends State<MainPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        "Promotion",
+                        "Promotions",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -240,8 +330,11 @@ class _MainPageState extends State<MainPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductPage(categoryName: 'All'),
+                              builder: (context) => ProductPage(
+                                categoryName:
+                                    'Promotions', // Kategori Promotions
+                                initialCategory: 'Promotions',
+                              ),
                             ),
                           );
                         },
@@ -261,44 +354,59 @@ class _MainPageState extends State<MainPage> {
                   // ===== PROMO SWIPER =====
                   SizedBox(
                     height: 185,
-                    child: PageView(
-                      controller: PageController(viewportFraction: 0.9),
-                      children: [
-                        _buildPromoCard(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4A3749), Color(0xFF24182E)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                    child: _promoLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _promoError != null
+                        ? Center(
+                            child: Text(
+                              _promoError!,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          )
+                        : PageView(
+                            controller: PageController(viewportFraction: 0.9),
+                            children: [
+                              _buildPromoCard(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF4A3749),
+                                    Color(0xFF24182E),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                title: "Hot Mocha\nCappuccino Latte",
+                                productKeyword: "Hot Mocha Cappuccino Latte",
+                                image: "assets/images/background/pic1.png",
+                              ),
+                              _buildPromoCard(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFFF5F5F),
+                                    Color(0xFFFF0000),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                title: "Hot Sweet\nIndonesian Tea",
+                                productKeyword: "Hot Sweet Indonesian Tea",
+                                image: "assets/images/background/pic2.png",
+                              ),
+                              _buildPromoCard(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF4A3749),
+                                    Color(0xFF24182E),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                title: "Espresso\nBold Edition",
+                                productKeyword: "Espresso Bold Edition",
+                                image: "assets/images/background/pic1.png",
+                              ),
+                            ],
                           ),
-                          title: "Hot Mocha\nCappuccino Latte",
-                          price: "\$5.8",
-                          oldPrice: "\$9.9",
-                          image: "assets/images/background/pic1.png",
-                        ),
-                        _buildPromoCard(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF5F5F), Color(0xFFFF0000)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          title: "Hot Sweet\nIndonesian Tea",
-                          price: "\$2.5",
-                          oldPrice: "\$5.4",
-                          image: "assets/images/background/pic2.png",
-                        ),
-                        _buildPromoCard(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4A3749), Color(0xFF24182E)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          title: "Espresso\nBold Edition",
-                          price: "\$4.2",
-                          oldPrice: "\$6.0",
-                          image: "assets/images/background/pic1.png",
-                        ),
-                      ],
-                    ),
                   ),
 
                   const SizedBox(height: 30),
@@ -457,96 +565,131 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // ===== PROMO CARD =====
+  // ===== PROMO CARD (UPDATED) =====
   Widget _buildPromoCard({
     required LinearGradient gradient,
     required String title,
-    required String price,
-    required String oldPrice,
+    required String productKeyword, // Keyword untuk mencari produk
     required String image,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(right: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: gradient,
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            bottom: -60,
-            left: -60,
-            child: _softCircle(150, Colors.white.withOpacity(0.08)),
-          ),
-          Positioned(
-            bottom: -60,
-            right: -60,
-            child: _softCircle(150, Colors.white.withOpacity(0.08)),
-          ),
-          Positioned(
-            top: 10,
-            right: 85,
-            child: _softCircle(30, Colors.white.withOpacity(0.12)),
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: Image.asset(
-              "assets/images/background/card-bg.png",
-              fit: BoxFit.cover,
-              color: Colors.white.withOpacity(0.05),
-              colorBlendMode: BlendMode.srcOver,
-              width: double.infinity,
-              height: double.infinity,
+    // Cari produk berdasarkan keyword
+    final product = _findProductByKeyword(productKeyword);
+
+    // Ambil harga dari produk atau gunakan default
+    final price = product != null
+        ? _currencyFmt.format(product.harga)
+        : "\$0.00";
+
+    // Hitung harga coret (misalnya harga asli + 40%)
+    final oldPrice = product != null
+        ? _currencyFmt.format(product.harga * 1.4)
+        : "\$0.00";
+
+    return InkWell(
+      // TAMBAHAN: Navigasi ke DetailPage saat card diklik
+      onTap: () {
+        if (product != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailPage(product: product),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        height: 1.2,
+          );
+        } else {
+          // Tampilkan pesan jika produk tidak ditemukan
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Produk "$title" tidak ditemukan'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: gradient,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              bottom: -60,
+              left: -60,
+              child: _softCircle(150, Colors.white.withOpacity(0.08)),
+            ),
+            Positioned(
+              bottom: -60,
+              right: -60,
+              child: _softCircle(150, Colors.white.withOpacity(0.08)),
+            ),
+            Positioned(
+              top: 10,
+              right: 85,
+              child: _softCircle(30, Colors.white.withOpacity(0.12)),
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image.asset(
+                "assets/images/background/card-bg.png",
+                fit: BoxFit.cover,
+                color: Colors.white.withOpacity(0.05),
+                colorBlendMode: BlendMode.srcOver,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Text(
-                          price,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          // Harga dari database
+                          Text(
+                            price,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          oldPrice,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.white70,
-                            decoration: TextDecoration.lineThrough,
+                          const SizedBox(width: 10),
+                          // Harga coret (harga asli + markup)
+                          Text(
+                            oldPrice,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.white70,
+                              decoration: TextDecoration.lineThrough,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Image.asset(image, height: 140, fit: BoxFit.contain),
-              ],
+                        ],
+                      ),
+                    ],
+                  ),
+                  Image.asset(image, height: 140, fit: BoxFit.contain),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -572,10 +715,8 @@ class _MainPageState extends State<MainPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductPage(
-              categoryName: title,
-              initialCategory: title, // ✅ Kirim kategori yang dipilih
-            ),
+            builder: (context) =>
+                ProductPage(categoryName: title, initialCategory: title),
           ),
         );
       },
