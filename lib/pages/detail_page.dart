@@ -86,7 +86,9 @@ class _DetailPageState extends State<DetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isFavorite ? 'Ditambahkan ke Wishlist!' : 'Dihapus dari Wishlist!',
+            isFavorite
+                ? 'Ditambahkan ke Wishlist & Favorit!'
+                : 'Dihapus dari Wishlist & Favorit!',
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -232,8 +234,9 @@ class _DetailPageState extends State<DetailPage> {
                               onTap: () => setState(() => selectedSize = size),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 25,
                                   vertical: 25,
@@ -364,8 +367,7 @@ class _DetailPageState extends State<DetailPage> {
                             duration: const Duration(milliseconds: 100),
                             child: Container(
                               width: double.infinity,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 18),
+                              padding: const EdgeInsets.symmetric(vertical: 18),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF3A2D46),
                                 borderRadius: BorderRadius.circular(16),
@@ -388,9 +390,7 @@ class _DetailPageState extends State<DetailPage> {
                                     children: [
                                       const TextSpan(
                                         text: 'PLACE ORDER  ',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
+                                        style: TextStyle(color: Colors.white),
                                       ),
                                       TextSpan(
                                         text:
