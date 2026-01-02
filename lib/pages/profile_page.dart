@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/wishlist_service.dart';
 import '../models/user_model.dart';
+import '../models/product_model.dart';
 import '../pages/edit_profile_page.dart';
 import '../pages/messages_page.dart';
 import '../pages/store_locations_page.dart';
+import '../pages/detail_page.dart';
 import '../components/sidebar.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -18,10 +21,15 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel? _currentUser;
   bool _isLoading = true;
 
+  // TAMBAHAN: Variabel untuk menyimpan wishlist
+  List<ProductModel> _wishlistItems = [];
+  bool _isLoadingWishlist = false;
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadWishlist(); // Load wishlist saat init
   }
 
   // ================= LOAD USER =================
@@ -36,6 +44,50 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (_) {}
 
     setState(() => _isLoading = false);
+  }
+
+  // ================= LOAD WISHLIST =================
+  Future<void> _loadWishlist() async {
+    setState(() => _isLoadingWishlist = true);
+
+    try {
+      final data = await WishlistService().fetchWishlist();
+      setState(() {
+        _wishlistItems = data;
+      });
+    } catch (e) {
+      print('Failed to load wishlist: $e');
+      // Tidak perlu snackbar di sini karena ini background loading
+    } finally {
+      setState(() => _isLoadingWishlist = false);
+    }
+  }
+
+  // ================= REMOVE FROM WISHLIST =================
+  Future<void> _removeFromWishlist(ProductModel product) async {
+    try {
+      final success = await WishlistService().removeFromWishlist(
+        product.idProduk,
+      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produk dihapus dari favorit'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        _loadWishlist(); // Reload wishlist/favourite setelah hapus
+      } else {
+        throw Exception('Gagal menghapus');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal menghapus favorit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -53,7 +105,13 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadUserData),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _loadUserData();
+              _loadWishlist();
+            },
+          ),
           Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.more_vert),
@@ -227,7 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // ================= FAVOURITE SECTION =================
+  // ================= FAVOURITE SECTION (UPDATED) =================
   Widget _buildFavouriteSection() {
     return Container(
       key: const ValueKey("fav"),
@@ -244,19 +302,137 @@ class _ProfilePageState extends State<ProfilePage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
-          _favouriteItem(
-            title: "Brewed Cappuccino Latte with Creamy Milk",
-            price: "\$5.8",
-            rating: "4.0",
-            image: "assets/images/cart/pic1.jpg",
-          ),
-          _favouriteItem(
-            title: "Melted Omelette with Spicy Chilli",
-            price: "\$8.2",
-            rating: "4.0",
-            image: "assets/images/cart/pic2.jpg",
+
+          // Loading atau List Wishlist
+          Expanded(
+            child: _isLoadingWishlist
+                ? const Center(child: CircularProgressIndicator())
+                : _wishlistItems.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Belum ada favorit",
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _wishlistItems.length,
+                    itemBuilder: (context, index) {
+                      final product = _wishlistItems[index];
+                      return _favouriteItemFromWishlist(
+                        product: product,
+                        onRemove: () => _removeFromWishlist(product),
+                        onTap: () async {
+                          // Navigate ke DetailPage dan reload wishlist saat kembali
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DetailPage(product: product),
+                            ),
+                          );
+                          _loadWishlist(); // Reload wishlist setelah kembali
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ================= FAVOURITE ITEM FROM WISHLIST =================
+  Widget _favouriteItemFromWishlist({
+    required ProductModel product,
+    required VoidCallback onRemove,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Gambar Produk
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child:
+                      product.gambarUrl != null && product.gambarUrl!.isNotEmpty
+                      ? Image.network(
+                          product.gambarUrl!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.image, size: 40),
+                        )
+                      : Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.coffee, size: 30),
+                        ),
+                ),
+                const SizedBox(width: 12),
+
+                // Info Produk
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.nama,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            '\$${product.harga}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Rating (hardcoded 4.5)
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          const Text("4.5", style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Tombol Hapus dari Wishlist
+                IconButton(
+                  icon: const Icon(Icons.favorite, color: Colors.red),
+                  onPressed: onRemove,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -277,46 +453,6 @@ class _ProfilePageState extends State<ProfilePage> {
           backgroundColor: isActive ? Colors.black : Colors.white,
           child: Icon(icon, color: isActive ? Colors.white : Colors.black),
         ),
-      ),
-    );
-  }
-
-  static Widget _favouriteItem({
-    required String title,
-    required String price,
-    required String rating,
-    required String image,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(image, width: 56, height: 56, fit: BoxFit.cover),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 6),
-                Text("$price   ⭐ $rating"),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
