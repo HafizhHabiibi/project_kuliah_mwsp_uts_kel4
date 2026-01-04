@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:project_kuliah_mwsp_uts_kel4/components/sidebar.dart';
+import '../models/review_model.dart';
+import '../services/rating_service.dart';
+import '../models/product_model.dart';
+import '../services/product_service.dart';
 
 class OrderReviewsPage extends StatefulWidget {
-  const OrderReviewsPage({super.key});
+  final int? productId; // null kalau dibuka dari Sidebar (global)
+  final String? productName;
+  final String? productImageUrl;
+
+  const OrderReviewsPage({
+    super.key,
+    this.productId,
+    this.productName,
+    this.productImageUrl,
+  });
 
   @override
   State<OrderReviewsPage> createState() => _OrderReviewsPageState();
@@ -10,214 +22,283 @@ class OrderReviewsPage extends StatefulWidget {
 
 class _OrderReviewsPageState extends State<OrderReviewsPage> {
   double _rating = 3.0;
-  bool isScrolledDown = true;
   final TextEditingController _reviewController = TextEditingController();
+  List<ReviewModel> reviews = [];
+  bool isLoading = true;
+
+  final RatingService _ratingService = RatingService();
+  final ProductService _productService = ProductService();
+  int? currentUserId;
+
+  List<ProductModel> allProducts = []; // Untuk mode Sidebar
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.productId != null) {
+      _fetchReviews();
+    } else {
+      _fetchAllProducts();
+    }
+  }
+
+  /// ===================== FETCH REVIEW SPESIFIK PRODUK =====================
+  Future<void> _fetchReviews() async {
+    setState(() => isLoading = true);
+    try {
+      final fetchedReviews = await _ratingService.fetchRatings(
+        widget.productId!,
+      );
+      setState(() {
+        reviews = fetchedReviews;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to load reviews: $e")));
+    }
+  }
+
+  /// ===================== FETCH ALL PRODUCTS (SIDEBAR MODE) =====================
+  Future<void> _fetchAllProducts() async {
+    setState(() => isLoading = true);
+    try {
+      final result = await _productService.getAllProducts();
+      if (result['success'] == true) {
+        setState(() {
+          allProducts = List<ProductModel>.from(result['products']);
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? "Failed to load products"),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  /// ===================== SUBMIT REVIEW =====================
+  Future<void> _submitReview() async {
+    if (widget.productId == null) return;
+
+    if (_reviewController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please write a review before submitting."),
+        ),
+      );
+      return;
+    }
+
+    bool success = await _ratingService.submitRating(
+      widget.productId!,
+      _rating,
+      _reviewController.text,
+    );
+
+    if (success) {
+      _reviewController.clear();
+      _rating = 3.0;
+      await _fetchReviews();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Review submitted successfully!")),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Failed to submit review.")));
+    }
+  }
+
+  /// ===================== AVERAGE RATING =====================
+  double get averageRating {
+    if (reviews.isEmpty) return 0.0;
+    double total = reviews.fold(0, (sum, r) => sum + r.rating);
+    return total / reviews.length;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Color appBarTextColor = isScrolledDown ? Colors.black : Colors.white;
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: const Text(
-          "Write Reviews",
-          style: TextStyle(
+        title: Text(
+          widget.productId != null
+              ? 'Reviews for ${widget.productName}'
+              : 'All Products Reviews',
+          style: const TextStyle(
             color: Colors.black,
             letterSpacing: 0.5,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Builder(
-              builder: (context) => IconButton(
-                icon: Icon(Icons.more_vert, color: appBarTextColor),
-                onPressed: () => Scaffold.of(context).openDrawer(),
+        centerTitle: true,
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : widget.productId != null
+          ? _buildProductReviewMode() // Dari Detail Page
+          : _buildSidebarMode(), // Dari Sidebar
+    );
+  }
+
+  /// ===================== WIDGET UNTUK DETAIL PAGE =====================
+  Widget _buildProductReviewMode() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.productImageUrl != null)
+            Center(child: Image.network(widget.productImageUrl!, height: 150)),
+          const SizedBox(height: 12),
+          Text("Your Rating:", style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Row(
+            children: List.generate(5, (index) {
+              final filled = index < _rating.round();
+              return GestureDetector(
+                onTap: () => setState(() => _rating = (index + 1).toDouble()),
+                child: Icon(
+                  filled ? Icons.star_rounded : Icons.star_border_rounded,
+                  color: filled ? Colors.amber : Colors.grey.shade400,
+                  size: 32,
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _reviewController,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: "Write your review here",
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _submitReview,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(74, 55, 73, 1),
+            ),
+            child: const Text(
+              "Submit Review",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
               ),
             ),
           ),
-        ],
-      ),
-      drawer: const SideBar(),
-      // 🧾 BODY
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 🖼️ Product Info
-            Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(
-                    "assets/images/menus/pic1.jpg",
-                    width: 160,
-                    height: 160,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Brewed Cappuccino Latte with Creamy Milk",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "Beverages",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 15),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Divider(
-                color: Colors.grey.shade300,
-                thickness: 1,
-                height: 1,
-              ),
-            ),
-
-            const SizedBox(height: 10,),
-            // 📝 Review Header
-            Container(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                  "What do you think?",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
-                  textAlign: TextAlign.left,
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 25),
-
-            // ⭐ Rating Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(5, (index) {
-                    final filled = index < _rating.round();
-                    return GestureDetector(
-                      onTap: () => setState(() => _rating = (index + 1).toDouble()),
-                      child: Icon(
-                        filled ? Icons.star_rounded : Icons.star_border_rounded,
-                        color: filled ? Colors.amber : Colors.grey.shade400,
-                        size: 34,
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              const Icon(Icons.star, color: Colors.amber),
+              const SizedBox(width: 4),
+              Text(averageRating.toStringAsFixed(1)),
+              const SizedBox(width: 8),
+              Text("(${reviews.length} reviews)"),
+            ],
+          ),
+          const SizedBox(height: 16),
+          reviews.isEmpty
+              ? const Text("No reviews yet.")
+              : ListView.builder(
+                  itemCount: reviews.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final review = reviews[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                review.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(review.rating.toString()),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(review.comment),
+                        ],
                       ),
                     );
-                  }),
+                  },
                 ),
-                const SizedBox(width: 155),
-                Text(
-                  _rating.toStringAsFixed(1),
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+        ],
+      ),
+    );
+  }
+
+  /// ===================== WIDGET UNTUK SIDEBAR MODE =====================
+  Widget _buildSidebarMode() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: allProducts.length,
+      itemBuilder: (context, index) {
+        final product = allProducts[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            leading: product.gambarUrl != null
+                ? Image.network(
+                    product.gambarUrl!,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  )
+                : const Icon(Icons.image_not_supported),
+            title: Text(product.nama),
+            subtitle: const Text(
+              "See Product Reviews",
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            onTap: () {
+              // Bisa navigasi ke review detail product
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OrderReviewsPage(
+                    productId: product.idProduk,
+                    productName: product.nama,
+                    productImageUrl: product.gambarUrl,
                   ),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            // 💬 TextArea
-            Container(
-                decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 255, 255, 255),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFD5D5D5)),
-                ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              child: TextField(
-                controller: _reviewController,
-                maxLines: 5,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Write your review here",
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      // 🟢 Submit Button (Bottom)
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          child: SizedBox(
-            height: 52,
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                if (_reviewController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please write a review before submitting.")),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Review submitted successfully!")),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(74, 55, 73, 1), // warna khas BIJI
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: const Text(
-                "SUBMIT REVIEW",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
-              ),
-            ),
+              );
+            },
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

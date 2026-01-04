@@ -7,6 +7,9 @@ class ProductModel {
   final String? deskripsi;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final double averageRating;
+  final int reviewCount;
+
 
   ProductModel({
     required this.idProduk,
@@ -17,6 +20,8 @@ class ProductModel {
     this.deskripsi,
     this.createdAt,
     this.updatedAt,
+    this.averageRating = 0.0, // default 0
+    this.reviewCount = 0,      // default 0
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {

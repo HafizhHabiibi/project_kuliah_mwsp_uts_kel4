@@ -5,7 +5,7 @@ class AppConfig {
   static const String baseUrl = 'http://10.0.2.2:8000/api';
 
   // Alamat HP fisik
-  // static const String baseUrl = 'http://192.168.0.104:8000/api';
+  // static const String baseUrl = 'http://192.168.0.105:8000/api';
 
   // ===== AUTH (PUBLIC) =====
   static const String register = '/register';
@@ -39,4 +39,7 @@ class AppConfig {
 
   //WISHLIST
   static const String wishlist = '$baseUrl/wishlist';
+
+  // ===== RATING =====
+  static const String ratings = '/ratings';
 }
