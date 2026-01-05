@@ -3,10 +3,13 @@ class ProductModel {
   final String nama;
   final String? gambarUrl;
   final String kategori;
-  final int harga;
+  final double harga;
   final String? deskripsi;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final double averageRating;
+  final int reviewCount;
+
 
   ProductModel({
     required this.idProduk,
@@ -17,6 +20,8 @@ class ProductModel {
     this.deskripsi,
     this.createdAt,
     this.updatedAt,
+    this.averageRating = 0.0, // default 0
+    this.reviewCount = 0,      // default 0
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -25,7 +30,7 @@ class ProductModel {
       nama: json['nama'] ?? '',
       gambarUrl: json['gambar_url'],
       kategori: json['kategori'] ?? '',
-      harga: json['harga'] ?? 0,
+      harga: _parsePrice(json['harga']),
       deskripsi: json['deskripsi'],
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
@@ -54,7 +59,7 @@ class ProductModel {
     String? nama,
     String? gambarUrl,
     String? kategori,
-    int? harga,
+    double? harga,
     String? deskripsi,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -69,5 +74,16 @@ class ProductModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  // Helper method to parse price from various types (String, int, double)
+  static double _parsePrice(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
   }
 }

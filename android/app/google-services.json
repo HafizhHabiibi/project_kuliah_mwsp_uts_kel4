@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "727087182254",
+    "project_id": "biji-coffee-auth",
+    "storage_bucket": "biji-coffee-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727087182254:android:5cd8b9460e26e4ce34583f",
+        "android_client_info": {
+          "package_name": "com.example.project_kuliah_mwsp_uts_kel4"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "727087182254-7i5b6h7303itai7vitj0q7u6r499gc11.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.project_kuliah_mwsp_uts_kel4",
+            "certificate_hash": "44d7b85726dc129dcc87c1dccc5c38595b4a9164"
+          }
+        },
+        {
+          "client_id": "727087182254-94hj6bsginfp6u4grhaql8b2v8drbcho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD__DW68Fhr96LSLPLbSkdV8O69eF6QJQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "727087182254-94hj6bsginfp6u4grhaql8b2v8drbcho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

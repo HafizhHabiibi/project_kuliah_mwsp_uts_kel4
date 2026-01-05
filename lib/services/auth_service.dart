@@ -1,12 +1,13 @@
 import '../config/app_config.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
+import 'google_auth_service.dart';
 
 class AuthService {
   final ApiService _apiService = ApiService();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
 
   // ================= REGISTER =================
-  // Register lalu AUTO LOGIN
   Future<Map<String, dynamic>> register({
     required String username,
     required String email,
@@ -22,7 +23,6 @@ class AuthService {
       final data = _apiService.parseResponse(response);
 
       if (response.statusCode == 201 && data['status'] == 'success') {
-        // setelah register → langsung login
         return await login(email: email, password: password);
       }
 
@@ -50,7 +50,6 @@ class AuthService {
       final data = _apiService.parseResponse(response);
 
       if (response.statusCode == 200 && data['status'] == 'success') {
-        // simpan token
         final token = data['token'];
         await _apiService.saveToken(token);
 
@@ -60,6 +59,38 @@ class AuthService {
       }
 
       return {'success': false, 'message': data['message'] ?? 'Login failed'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // ================= LOGIN WITH GOOGLE (FINAL) =================
+  Future<Map<String, dynamic>> loginWithGoogle() async {
+    try {
+      // 1️⃣ Ambil data user dari Google + Firebase
+      final googleUserData = await _googleAuthService.signInWithGoogle();
+
+      // 2️⃣ Kirim ke backend Laravel
+      final response = await _apiService.post(
+        AppConfig.googleLogin,
+        body: googleUserData,
+        needsAuth: false,
+      );
+
+      final data = _apiService.parseResponse(response);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        final token = data['token'];
+        await _apiService.saveToken(token);
+
+        final user = UserModel.fromJson(data['user']);
+        return {'success': true, 'user': user, 'token': token};
+      }
+
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Login Google gagal',
+      };
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
@@ -76,9 +107,7 @@ class AuthService {
       final data = _apiService.parseResponse(response);
 
       if (response.statusCode == 200 && data['status'] == 'success') {
-        // backend mengirim user login di key "data"
         final user = UserModel.fromJson(data['data']);
-
         return {'success': true, 'user': user};
       }
 
@@ -135,7 +164,6 @@ class AuthService {
     try {
       await _apiService.post(AppConfig.logout, body: {}, needsAuth: true);
     } finally {
-      // apapun hasilnya → hapus token
       await _apiService.removeToken();
     }
   }
@@ -144,5 +172,11 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     final token = await _apiService.getToken();
     return token != null && token.isNotEmpty;
+  }
+
+  // ================= STATIC GET TOKEN =================
+  static Future<String?> getToken() async {
+    final apiService = ApiService();
+    return await apiService.getToken();
   }
 }
