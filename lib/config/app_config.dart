@@ -11,11 +11,13 @@ class AppConfig {
   static const String register = '/register';
   static const String login = '/login';
 
-  // ===== PRODUK ROUTES (PUBLIC) =====
-  static const String produk = '/produk'; // Get all products
-  static const String produkKategori = '/produk/kategori'; // Get all categories
+  // 🔥 GOOGLE LOGIN (TAMBAHAN)
+  static const String googleLogin = '/google-login';
 
-  // Dynamic routes - use with string interpolation
+  // ===== PRODUK ROUTES (PUBLIC) =====
+  static const String produk = '/produk';
+  static const String produkKategori = '/produk/kategori';
+
   static String getProdukByKategori(String kategori) =>
       '/produk/kategori/$kategori';
 
@@ -30,16 +32,15 @@ class AppConfig {
   // Profile Update
   static const String updateProfile = '/user/profile';
 
-  // Keranjang (Shopping Cart)
-  static const String keranjang = '/keranjang'; // View cart & Add to cart
+  // Keranjang
+  static const String keranjang = '/keranjang';
 
-  // Dynamic routes for cart operations
-  static String updateKeranjang(int id) => '/keranjang/$id'; // Update quantity
-  static String deleteKeranjang(int id) => '/keranjang/$id'; // Remove from cart
+  static String updateKeranjang(int id) => '/keranjang/$id';
+  static String deleteKeranjang(int id) => '/keranjang/$id';
 
-  //WISHLIST
+  // Wishlist
   static const String wishlist = '$baseUrl/wishlist';
 
-  // ===== RATING =====
+  // Rating
   static const String ratings = '/ratings';
 }

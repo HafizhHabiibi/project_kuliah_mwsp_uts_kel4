@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services") // ✅ Tambahkan ini untuk Firebase Google Sign-In
 }
 
 android {
@@ -32,8 +33,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing dengan debug keys untuk sementara
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -42,3 +42,7 @@ android {
 flutter {
     source = "../.."
 }
+
+// ✅ Tambahan penting untuk Firebase:
+// Pastikan file google-services.json sudah ada di folder android/app
+// Plugin 'com.google.gms.google-services' akan otomatis membaca dan mengkonfigurasi Firebase

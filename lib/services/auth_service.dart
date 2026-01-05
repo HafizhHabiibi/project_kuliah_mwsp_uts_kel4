@@ -1,9 +1,11 @@
 import '../config/app_config.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
+import 'google_auth_service.dart';
 
 class AuthService {
   final ApiService _apiService = ApiService();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
 
   // ================= REGISTER =================
   Future<Map<String, dynamic>> register({
@@ -57,6 +59,38 @@ class AuthService {
       }
 
       return {'success': false, 'message': data['message'] ?? 'Login failed'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // ================= LOGIN WITH GOOGLE (FINAL) =================
+  Future<Map<String, dynamic>> loginWithGoogle() async {
+    try {
+      // 1️⃣ Ambil data user dari Google + Firebase
+      final googleUserData = await _googleAuthService.signInWithGoogle();
+
+      // 2️⃣ Kirim ke backend Laravel
+      final response = await _apiService.post(
+        AppConfig.googleLogin,
+        body: googleUserData,
+        needsAuth: false,
+      );
+
+      final data = _apiService.parseResponse(response);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        final token = data['token'];
+        await _apiService.saveToken(token);
+
+        final user = UserModel.fromJson(data['user']);
+        return {'success': true, 'user': user, 'token': token};
+      }
+
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Login Google gagal',
+      };
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }

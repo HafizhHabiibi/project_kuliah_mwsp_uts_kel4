@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import 'forget_pass_screen.dart';
 import 'register_form_screen.dart';
@@ -54,47 +52,34 @@ class _LoginScreenState extends State<LoginScreen>
     });
   }
 
-  // ==========================================
-  // 🚀 LOGIN FUNCTION
-  // ==========================================
+  // ================= LOGIN EMAIL =================
   Future<void> _login() async {
     setState(() => _isLoading = true);
-
     try {
       final authService = AuthService();
-      
-      // Use AuthService to login (this will save the token)
       final result = await authService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
       if (result['success'] == true) {
-        // 🟢 Login sukses
         final user = result['user'];
-        
-        // Set current user in CartService
         CartService().setCurrentUser(user.id.toString());
-        print('✅ User logged in: ${user.username} (ID: ${user.id})');
-        print('✅ Token saved: ${result['token']}');
-        
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Login berhasil!")));
 
-        // pindah ke MainPage
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainPage()),
+          MaterialPageRoute(builder: (_) => const MainPage()),
         );
       } else {
-        // 🔴 Error dari API
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'] ?? "Login gagal")),
         );
       }
     } catch (e) {
-      // 🔴 Error dari sisi aplikasi / jaringan
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -103,9 +88,40 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
-  // ==========================================
-  // UI — tidak ada yang diubah
-  // ==========================================
+  // ================= LOGIN GOOGLE =================
+  Future<void> _loginWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final authService = AuthService();
+      final result = await authService.loginWithGoogle();
+
+      if (result['success'] == true) {
+        final user = result['user'];
+        CartService().setCurrentUser(user.id.toString());
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Login Google berhasil!")));
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? "Login Google gagal")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error login Google: $e")));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,31 +154,23 @@ class _LoginScreenState extends State<LoginScreen>
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(34, 34, 34, 1),
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
                       const Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                       const SizedBox(height: 24),
 
+                      // EMAIL
                       const Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Email',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
+                        child: Text('Email'),
                       ),
                       const SizedBox(height: 10),
                       TextField(
-                        controller: _emailController
-                          ..text = _emailController.text.isEmpty
-                              ? 'info@example.com'
-                              : _emailController.text,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           hintText: 'Email Address',
                           border: OutlineInputBorder(
@@ -170,14 +178,13 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 16),
 
+                      // PASSWORD
                       const Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Password',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
+                        child: Text('Password'),
                       ),
                       const SizedBox(height: 10),
                       TextField(
@@ -199,9 +206,10 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 24),
 
-                      // ========== LOGIN BUTTON (DIUBAH) ==========
+                      // LOGIN BUTTON
                       ElevatedButton(
                         onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
@@ -215,17 +223,12 @@ class _LoginScreenState extends State<LoginScreen>
                             ? const CircularProgressIndicator(
                                 color: Colors.white,
                               )
-                            : const Text(
-                                "LOGIN",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  letterSpacing: 1.5,
-                                  color: Colors.white,
-                                ),
-                              ),
+                            : const Text("LOGIN"),
                       ),
 
                       const SizedBox(height: 10),
+
+                      // FORGOT PASSWORD (SAMA SEPERTI YANG LAMA)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Row(
@@ -233,11 +236,6 @@ class _LoginScreenState extends State<LoginScreen>
                           children: [
                             TextButton(
                               onPressed: () {},
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
                               child: const Text(
                                 "Forgot Password?",
                                 style: TextStyle(
@@ -245,22 +243,15 @@ class _LoginScreenState extends State<LoginScreen>
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 5),
                             TextButton(
                               onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ForgetPassScreen(),
+                                    builder: (_) => const ForgetPassScreen(),
                                   ),
                                 );
                               },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
                               child: const Text(
                                 "Reset Password",
                                 style: TextStyle(
@@ -271,28 +262,21 @@ class _LoginScreenState extends State<LoginScreen>
                           ],
                         ),
                       ),
+
                       const SizedBox(height: 30),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/social/google-mail.png',
-                            height: 40,
-                          ),
-                          const SizedBox(width: 20),
-                          Image.asset(
-                            'assets/images/social/facebook.png',
-                            height: 40,
-                          ),
-                        ],
+                      // GOOGLE LOGIN (TENGAH & BISA DIKLIK)
+                      GestureDetector(
+                        onTap: _loginWithGoogle,
+                        child: Image.asset(
+                          'assets/images/social/google-mail.png',
+                          height: 40,
+                        ),
                       ),
+
                       const SizedBox(height: 30),
 
-                      const Text(
-                        "Don’t have any account?",
-                        style: TextStyle(color: Colors.grey),
-                      ),
+                      const Text("Don’t have any account?"),
                       const SizedBox(height: 16),
 
                       ElevatedButton(
@@ -300,7 +284,7 @@ class _LoginScreenState extends State<LoginScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RegisterFormScreen(),
+                              builder: (_) => const RegisterFormScreen(),
                             ),
                           );
                         },
@@ -312,16 +296,8 @@ class _LoginScreenState extends State<LoginScreen>
                             229,
                             1,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
-                          ),
                         ),
-                        child: const Text(
-                          "CREATE AN ACCOUNT",
-                          style: TextStyle(
-                            color: Color.fromRGBO(100, 100, 100, 1),
-                          ),
-                        ),
+                        child: const Text("CREATE AN ACCOUNT"),
                       ),
                     ],
                   ),
