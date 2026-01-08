@@ -20,19 +20,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       'image': 'assets/images/background/bg1.jpg',
       'title': 'Start your morning\nwith great coffee',
       'subtitle':
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
+          'Awali harimu dengan secangkir kopi pilihan yang diseduh dengan sepenuh hati.',
     },
     {
       'image': 'assets/images/background/bg2.jpg',
       'title': 'Best coffee shop\nin this town',
       'subtitle':
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
+          'Biji kopi berkualitas, barista berpengalaman, dan rasa yang selalu konsisten.',
     },
     {
       'image': 'assets/images/background/bg3.jpg',
       'title': 'Taste from the\ngood old days',
       'subtitle':
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
+          'Setiap tegukan membawa rasa klasik yang selalu dirindukan.',
     },
   ];
 
