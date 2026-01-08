@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+
+// Imports internal project
 import 'package:project_kuliah_mwsp_uts_kel4/components/bottom_bar.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/detail_page.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/pages/cart_page.dart';
@@ -10,7 +13,6 @@ import 'package:project_kuliah_mwsp_uts_kel4/services/auth_service.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/services/cart_service.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/models/product_model.dart';
 import 'package:project_kuliah_mwsp_uts_kel4/models/user_model.dart';
-import 'package:intl/intl.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -41,6 +43,10 @@ class _MainPageState extends State<MainPage> {
   String? _promoError;
   List<ProductModel> _promoProducts = const [];
 
+  // TAMBAHAN: State untuk menyimpan jumlah produk per kategori
+  Map<String, int> _categoryProductCount = {};
+  bool _categoryCountLoading = true;
+
   // Flag untuk tracking apakah sudah pernah load
   bool _hasLoadedOnce = false;
 
@@ -50,12 +56,12 @@ class _MainPageState extends State<MainPage> {
     _loadUserData();
     _loadFeaturedProducts();
     _loadPromoProducts();
+    _loadCategoryProductCount();
   }
 
   // FUNGSI UNTUK GREETING DINAMIS
   String _getGreeting() {
     final hour = DateTime.now().hour;
-
     if (hour >= 5 && hour < 11) {
       return "Good Morning";
     } else if (hour >= 11 && hour < 15) {
@@ -67,17 +73,45 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  // ✅ FUNGSI BARU: Load dan hitung jumlah produk per kategori
+  Future<void> _loadCategoryProductCount() async {
+    setState(() {
+      _categoryCountLoading = true;
+    });
+    try {
+      final result = await _productService.getAllProducts();
+      if (mounted && result['success'] == true) {
+        final List<ProductModel> products = result['products'] as List<ProductModel>;
+        
+        // Hitung jumlah produk per kategori
+        final Map<String, int> countMap = {};
+        for (var product in products) {
+          final category = product.kategori;
+          countMap[category] = (countMap[category] ?? 0) + 1;
+        }
 
-    // Cek apakah halaman ini sedang aktif/visible
-    final route = ModalRoute.of(context);
-    if (route != null && route.isCurrent && _hasLoadedOnce) {
-      // Reload user data untuk mendapatkan data terbaru
-      _loadUserData();
-      print('🔄 MainPage terdeteksi aktif kembali - refresh user data');
+        setState(() {
+          _categoryProductCount = countMap;
+          _categoryCountLoading = false;
+        });
+        print('✅ Jumlah produk per kategori: $_categoryProductCount');
+      } else {
+        setState(() {
+          _categoryCountLoading = false;
+        });
+        print('⚠️ Gagal memuat jumlah produk per kategori');
+      }
+    } catch (e) {
+      setState(() {
+        _categoryCountLoading = false;
+      });
+      print('❌ Error loading category product count: $e');
     }
+  }
+
+  // ✅ FUNGSI HELPER: Ambil jumlah produk berdasarkan kategori
+  int _getProductCount(String category) {
+    return _categoryProductCount[category] ?? 0;
   }
 
   // Load user data from AuthService
@@ -89,23 +123,19 @@ class _MainPageState extends State<MainPage> {
         _isLoadingUser = true;
       });
     }
-
     try {
       final result = await AuthService().getUserInfo();
-
       if (result['success'] == true && result['user'] != null) {
         setState(() {
           _currentUser = result['user'] as UserModel;
           _isLoadingUser = false;
           _hasLoadedOnce = true;
         });
-
         // Initialize cart service with user ID
         CartService().setCurrentUser(_currentUser!.id.toString());
         print(
           '✅ User session initialized: ${_currentUser!.username} (ID: ${_currentUser!.id})',
         );
-
         // Load cart from backend
         await CartService().loadCartFromBackend();
       } else {
@@ -132,14 +162,14 @@ class _MainPageState extends State<MainPage> {
     });
 
     final result = await _productService.getFeaturedProducts(limit: 8);
+
     if (mounted) {
       setState(() {
         if (result['success'] == true) {
           _featuredProducts = (result['products'] as List<ProductModel>);
           _featuredLoading = false;
         } else {
-          _featuredError = (result['message'] ?? 'Gagal memuat produk')
-              .toString();
+          _featuredError = (result['message'] ?? 'Gagal memuat produk').toString();
           _featuredLoading = false;
         }
       });
@@ -151,21 +181,18 @@ class _MainPageState extends State<MainPage> {
       _promoLoading = true;
       _promoError = null;
     });
-
     try {
       // Ambil semua produk atau produk tertentu
       final result = await _productService.getAllProducts();
-
       if (mounted) {
         setState(() {
           if (result['success'] == true) {
             _promoProducts = result['products'] as List<ProductModel>;
             _promoLoading = false;
-
             // DEBUG: Print semua produk untuk melihat nama yang tersedia
             print('🔍 Total produk dimuat: ${_promoProducts.length}');
             for (var product in _promoProducts) {
-              print('   - ${product.nama} (Kategori: ${product.kategori})');
+              print(' - ${product.nama} (Kategori: ${product.kategori})');
             }
           } else {
             _promoError = result['message']?.toString() ?? 'Gagal memuat promo';
@@ -204,8 +231,7 @@ class _MainPageState extends State<MainPage> {
       // 2. Coba cari dengan keyword di awal nama
       try {
         foundProduct = _promoProducts.firstWhere(
-          (product) =>
-              product.nama.toLowerCase().startsWith(keyword.toLowerCase()),
+          (product) => product.nama.toLowerCase().startsWith(keyword.toLowerCase()),
         );
         print('✅ Produk ditemukan (starts with): ${foundProduct.nama}');
         return foundProduct;
@@ -216,8 +242,7 @@ class _MainPageState extends State<MainPage> {
       // 3. Coba cari dengan contains (paling fleksibel tapi bisa salah)
       try {
         foundProduct = _promoProducts.firstWhere(
-          (product) =>
-              product.nama.toLowerCase().contains(keyword.toLowerCase()),
+          (product) => product.nama.toLowerCase().contains(keyword.toLowerCase()),
         );
         print('⚠️ Produk ditemukan (contains): ${foundProduct.nama}');
         return foundProduct;
@@ -280,7 +305,6 @@ class _MainPageState extends State<MainPage> {
                           ],
                         ),
                       ),
-
                       // Klik pada foto profil untuk ke notifikasi
                       InkWell(
                         borderRadius: BorderRadius.circular(50),
@@ -331,8 +355,7 @@ class _MainPageState extends State<MainPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProductPage(
-                                categoryName:
-                                    'Promotions', // Kategori Promotions
+                                categoryName: 'Promotions', // Kategori Promotions
                                 initialCategory: 'Promotions',
                               ),
                             ),
@@ -349,6 +372,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 15),
 
                   // ===== PROMO SWIPER =====
@@ -357,56 +381,56 @@ class _MainPageState extends State<MainPage> {
                     child: _promoLoading
                         ? const Center(child: CircularProgressIndicator())
                         : _promoError != null
-                        ? Center(
-                            child: Text(
-                              _promoError!,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          )
-                        : PageView(
-                            controller: PageController(viewportFraction: 0.9),
-                            children: [
-                              _buildPromoCard(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF4A3749),
-                                    Color(0xFF24182E),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                            ? Center(
+                                child: Text(
+                                  _promoError!,
+                                  style: const TextStyle(color: Colors.red),
                                 ),
-                                title: "Hot Mocha\nCappuccino Latte",
-                                productKeyword: "Hot Mocha Cappuccino Latte",
-                                image: "assets/images/background/pic1.png",
+                              )
+                            : PageView(
+                                controller: PageController(viewportFraction: 0.9),
+                                children: [
+                                  _buildPromoCard(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF4A3749),
+                                        Color(0xFF24182E),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    title: "Hot Mocha\nCappuccino Latte",
+                                    productKeyword: "Hot Mocha Cappuccino Latte",
+                                    image: "assets/images/background/pic1.png",
+                                  ),
+                                  _buildPromoCard(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFFFF5F5F),
+                                        Color(0xFFFF0000),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    title: "Hot Sweet\nIndonesian Tea",
+                                    productKeyword: "Hot Sweet Indonesian Tea",
+                                    image: "assets/images/background/pic2.png",
+                                  ),
+                                  _buildPromoCard(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF4A3749),
+                                        Color(0xFF24182E),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    title: "Espresso\nBold Edition",
+                                    productKeyword: "Espresso Bold Edition",
+                                    image: "assets/images/background/pic1.png",
+                                  ),
+                                ],
                               ),
-                              _buildPromoCard(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFFF5F5F),
-                                    Color(0xFFFF0000),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                title: "Hot Sweet\nIndonesian Tea",
-                                productKeyword: "Hot Sweet Indonesian Tea",
-                                image: "assets/images/background/pic2.png",
-                              ),
-                              _buildPromoCard(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF4A3749),
-                                    Color(0xFF24182E),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                title: "Espresso\nBold Edition",
-                                productKeyword: "Espresso Bold Edition",
-                                image: "assets/images/background/pic1.png",
-                              ),
-                            ],
-                          ),
                   ),
 
                   const SizedBox(height: 30),
@@ -421,45 +445,46 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   const SizedBox(height: 15),
-
                   SizedBox(
                     height: 150,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        _buildCategoryCard(
-                          svgPath: "assets/images/svg/kopi.svg",
-                          title: "Beverages",
-                          subtitle: "67 Menus",
-                        ),
-                        _buildCategoryCard(
-                          svgPath: "assets/images/svg/burger.svg",
-                          title: "Foods",
-                          subtitle: "23 Menus",
-                        ),
-                        _buildCategoryCard(
-                          svgPath: "assets/images/svg/pizza.svg",
-                          title: "Pizza",
-                          subtitle: "16 Menus",
-                        ),
-                        _buildCategoryCard(
-                          svgPath: "assets/images/svg/drink.svg",
-                          title: "Drink",
-                          subtitle: "18 Menus",
-                        ),
-                        _buildCategoryCard(
-                          svgPath: "assets/images/svg/lunch.svg",
-                          title: "Lunch",
-                          subtitle: "45 Menus",
-                        ),
-                        _buildCategoryCard(
-                          svgPath: "assets/images/svg/burger.svg",
-                          title: "Burger",
-                          subtitle: "12 Menus",
-                        ),
-                      ],
-                    ),
+                    child: _categoryCountLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            children: [
+                              _buildCategoryCard(
+                                svgPath: "assets/images/svg/kopi.svg",
+                                title: "Beverages",
+                                subtitle: "${_getProductCount('Beverages')} Menus",
+                              ),
+                              _buildCategoryCard(
+                                svgPath: "assets/images/svg/burger.svg",
+                                title: "Foods",
+                                subtitle: "${_getProductCount('Foods')} Menus",
+                              ),
+                              _buildCategoryCard(
+                                svgPath: "assets/images/svg/pizza.svg",
+                                title: "Pizza",
+                                subtitle: "${_getProductCount('Pizza')} Menus",
+                              ),
+                              _buildCategoryCard(
+                                svgPath: "assets/images/svg/drink.svg",
+                                title: "Drink",
+                                subtitle: "${_getProductCount('Drink')} Menus",
+                              ),
+                              _buildCategoryCard(
+                                svgPath: "assets/images/svg/lunch.svg",
+                                title: "Lunch",
+                                subtitle: "${_getProductCount('Lunch')} Menus",
+                              ),
+                              _buildCategoryCard(
+                                svgPath: "assets/images/svg/burger.svg",
+                                title: "Burger",
+                                subtitle: "${_getProductCount('Burger')} Menus",
+                              ),
+                            ],
+                          ),
                   ),
 
                   const SizedBox(height: 30),
@@ -474,34 +499,33 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   const SizedBox(height: 15),
-
                   SizedBox(
                     height: 240,
                     child: _featuredLoading
                         ? const Center(child: CircularProgressIndicator())
                         : (_featuredError != null)
-                        ? Center(
-                            child: Text(
-                              _featuredError!,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          )
-                        : (_featuredProducts.isEmpty)
-                        ? const Center(
-                            child: Text(
-                              'Belum ada produk',
-                              style: TextStyle(color: Colors.black54),
-                            ),
-                          )
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: _featuredProducts.length,
-                            itemBuilder: (context, index) {
-                              final product = _featuredProducts[index];
-                              return _buildFeaturedProductCard(product);
-                            },
-                          ),
+                            ? Center(
+                                child: Text(
+                                  _featuredError!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              )
+                            : (_featuredProducts.isEmpty)
+                                ? const Center(
+                                    child: Text(
+                                      'Belum ada produk',
+                                      style: TextStyle(color: Colors.black54),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: _featuredProducts.length,
+                                    itemBuilder: (context, index) {
+                                      final product = _featuredProducts[index];
+                                      return _buildFeaturedProductCard(product);
+                                    },
+                                  ),
                   ),
                 ],
               ),
@@ -541,8 +565,7 @@ class _MainPageState extends State<MainPage> {
 
   // ===== FOTO PROFIL =====
   Widget _buildProfileImage() {
-    if (_currentUser?.gambarUrl != null &&
-        _currentUser!.gambarUrl!.isNotEmpty) {
+    if (_currentUser?.gambarUrl != null && _currentUser!.gambarUrl!.isNotEmpty) {
       return Image.network(
         _currentUser!.gambarUrl!,
         height: 45,
@@ -576,9 +599,7 @@ class _MainPageState extends State<MainPage> {
     final product = _findProductByKeyword(productKeyword);
 
     // Ambil harga dari produk atau gunakan default
-    final price = product != null
-        ? _currencyFmt.format(product.harga)
-        : "\$0.00";
+    final price = product != null ? _currencyFmt.format(product.harga) : "\$0.00";
 
     // Hitung harga coret (misalnya harga asli + 40%)
     final oldPrice = product != null
@@ -715,8 +736,10 @@ class _MainPageState extends State<MainPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                ProductPage(categoryName: title, initialCategory: title),
+            builder: (context) => ProductPage(
+              categoryName: title,
+              initialCategory: title,
+            ),
           ),
         );
       },
@@ -775,6 +798,7 @@ class _MainPageState extends State<MainPage> {
   // ===== FEATURED CARD (from ProductModel) =====
   Widget _buildFeaturedProductCard(ProductModel product) {
     final priceStr = _currencyFmt.format(product.harga);
+
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
@@ -804,11 +828,8 @@ class _MainPageState extends State<MainPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  child:
-                      product.gambarUrl != null && product.gambarUrl!.isNotEmpty
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: product.gambarUrl != null && product.gambarUrl!.isNotEmpty
                       ? Image.network(
                           product.gambarUrl!,
                           height: 100,
@@ -886,7 +907,6 @@ class _MainPageState extends State<MainPage> {
                 ),
               ],
             ),
-
             // ===== TOMBOL KERANJANG =====
             Positioned(
               top: 80,
