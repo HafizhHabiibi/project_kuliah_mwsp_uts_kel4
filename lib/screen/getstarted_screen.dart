@@ -20,7 +20,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void initState() {
     super.initState();
 
-    // Animasi dua lingkaran (bergerak kanan kiri)
     _circle1Controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
@@ -45,19 +44,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       "image": "assets/images/rank.png",
       "title": "Best coffee shop\nin this town",
       "desc":
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+          "Kopi pilihan dari biji terbaik, diseduh dengan standar kualitas tinggi.",
     },
     {
       "image": "assets/images/rank.png",
       "title": "Start your morning\nwith great coffee",
       "desc":
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+          "Temani pagimu dengan aroma kopi segar untuk memulai hari penuh semangat.",
     },
     {
       "image": "assets/images/rank.png",
       "title": "Taste from the\ngood old days",
       "desc":
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+          "Setiap tegukan membawa rasa klasik yang selalu dirindukan.",
     },
   ];
 
@@ -69,6 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // Background image
             Positioned.fill(
               child: Image.asset(
                 'assets/images/background/linebg.png',
@@ -76,84 +76,97 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ),
             ),
 
-            // PageView slides
-            PageView.builder(
-              controller: _controller,
-              itemCount: slides.length,
-              onPageChanged: (index) {
-                setState(() => _currentIndex = index);
-              },
-              itemBuilder: (context, index) {
-                final slide = slides[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 50),
-                      Image.asset(slide['image']!, height: 350),
-                      const SizedBox(height: 80),
-                      Text(
-                        slide['title']!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.4,
+            // Main content dengan Column layout yang lebih terstruktur
+            Column(
+              children: [
+                // PageView dengan Expanded agar mengisi ruang yang tersedia
+                Expanded(
+                  child: PageView.builder(
+                    controller: _controller,
+                    itemCount: slides.length,
+                    onPageChanged: (index) {
+                      setState(() => _currentIndex = index);
+                    },
+                    itemBuilder: (context, index) {
+                      final slide = slides[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 50),
+                            // Gambar ilustrasi
+                            Image.asset(
+                              slide['image']!,
+                              height: 300, // Dikurangi sedikit untuk memberi ruang
+                            ),
+                            const SizedBox(height: 60),
+                            // Title
+                            Text(
+                              slide['title']!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 35,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Description
+                            Text(
+                              slide['desc']!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        slide['desc']!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 60),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+                ),
 
-            // Dots indicator
-            Positioned(
-              bottom: 200,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  slides.length,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _currentIndex == index ? 10 : 10,
-                    height: _currentIndex == index ? 10 : 10,
-                    decoration: BoxDecoration(
-                      color: _currentIndex == index
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.4),
-                      shape: BoxShape.circle,
+                // Dots indicator - posisi di bawah content
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      slides.length,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: _currentIndex == index ? 10 : 10,
+                        height: _currentIndex == index ? 10 : 10,
+                        decoration: BoxDecoration(
+                          color: _currentIndex == index
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.4),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
-            // Tombol Start animasi
-            Positioned(
-              bottom: 40,
-              child: AnimatedStartButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                  );
-                },
-              ),
+                // Tombol Start dengan padding dari bawah
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40),
+                  child: AnimatedStartButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const WelcomeScreen()),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -162,7 +175,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 }
 
-/// 🌟 Tombol Start seperti CSS `.start-btn`
+/// 🌟 Tombol Start dengan animasi rotasi
 class AnimatedStartButton extends StatefulWidget {
   final VoidCallback onPressed;
 
@@ -183,7 +196,6 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
   void initState() {
     super.initState();
 
-    // Durasi lebih panjang untuk transisi lebih halus
     _circle1Controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2800),
@@ -193,9 +205,6 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
       duration: const Duration(milliseconds: 2800),
     );
 
-    // Gunakan CurvedAnimation + Interval sehingga ada "delay" (pause) di awal/akhir
-    // Interval memetakan range controller sehingga bagian di luar interval tidak berubah,
-    // menghasilkan efek jeda ketika bergerak ke/ dari posisi akhir.
     _circle1Rotate = Tween<double>(begin: 2.5, end: 0).animate(
       CurvedAnimation(
         parent: _circle1Controller,
@@ -210,7 +219,6 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
       ),
     );
 
-    // Delay kecil sebelum mulai untuk memberi kesan "starting pause"
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) {
         _circle1Controller.repeat(reverse: true);
@@ -231,12 +239,12 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
     return GestureDetector(
       onTap: widget.onPressed,
       child: SizedBox(
-        width: 105, // sesuai css width:105px
+        width: 105,
         height: 105,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // circle2 (paling luar)
+            // Circle 2 (outer circle)
             AnimatedBuilder(
               animation: _circle2Rotate,
               builder: (context, child) {
@@ -252,7 +260,7 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
                 fit: BoxFit.contain,
               ),
             ),
-            // circle1 (di depan circle2)
+            // Circle 1 (inner circle)
             AnimatedBuilder(
               animation: _circle1Rotate,
               builder: (context, child) {
@@ -268,7 +276,7 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
                 fit: BoxFit.contain,
               ),
             ),
-            // icon‐bx (tombol utama)
+            // Button icon
             Container(
               width: 60,
               height: 60,
@@ -276,7 +284,7 @@ class _AnimatedStartButtonState extends State<AnimatedStartButton>
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: Center(
+              child: const Center(
                 child: Icon(
                   Icons.arrow_forward_rounded,
                   size: 28,
