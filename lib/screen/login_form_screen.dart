@@ -159,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+                        "Sudah pernah mendaftar? Silahkan Login dengan memasukan email dan password!",
                       ),
                       const SizedBox(height: 24),
 
@@ -215,6 +215,7 @@ class _LoginScreenState extends State<LoginScreen>
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor: const Color.fromRGBO(74, 55, 73, 1),
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
